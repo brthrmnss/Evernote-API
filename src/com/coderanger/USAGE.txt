@@ -1,0 +1,77 @@
+ * An ActionScript 3 implementation of OAUTH, An open protocol to allow secure API authorization
+ * Visit www.oauth.net for further information.
+ * Copyright (c) 2009 Dan Petitt (http://coderanger.com). All rights reserved.
+ * 
+ * Requires as3corelib from http://code.google.com/p/as3corelib/. Copyright Henri Torgemane
+ * 
+ * Redistribution and use in source and binary forms, with or without modification, 
+ * are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this list 
+ * of conditions and the following disclaimer. Redistributions in binary form must 
+ * reproduce the above copyright notice, this list of conditions and the following 
+ * disclaimer in the documentation and/or other materials provided with the distribution.
+ *
+ * Neither the name of the author nor the names of its contributors may be used to endorse
+ * or promote products derived from this software without specific prior written permission.
+ *
+ * THE SOFTWARE IS PROVIDED "AS-IS" AND WITHOUT WARRANTY OF ANY KIND, 
+ * EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY 
+ * WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  
+ *
+ * IN NO EVENT SHALL TOM WU BE LIABLE FOR ANY SPECIAL, INCIDENTAL,
+ * INDIRECT OR CONSEQUENTIAL DAMAGES OF ANY KIND, OR ANY DAMAGES WHATSOEVER
+ * RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER OR NOT ADVISED OF
+ * THE POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF LIABILITY, ARISING OUT
+ * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+
+GENERAL IDEA
+	1.	The application uses oauth/request_token to obtain a request token from twitter.com. 
+	2.	The application directs the user to oauth/authorize on twitter.com. 
+	3.	After obtaining approval from the user, a prompt on twitter.com will display a 7 digit PIN. 
+	4.	The user is instructed to copy this PIN and return to the appliction. 
+	5.	The application will prompt the user to enter the PIN from step 4. 
+	6.	The application uses the PIN as the value for the oauth_verifier parameter in a call to oauth/access_token which will verify the PIN and exchange a request_token for an access_token. 
+	7.	Twitter will return an access_token for the application to generate subsequent OAuth signatures. 
+
+			The access token, access secret and access PIN need to be persisted for future requests
+
+	
+TO AUTHORISE APPLICATION
+Create an instance of the class and set it up for your application:
+	a. setup the oauthDomain, consumerKey, consumerSecret and usePinWorkflow properties
+		 (if necessary, modify the requestTokenFragment, authorizeFragment, accessTokenFragment for the consumer you are using)
+	b. setup listeners for OAuthEvent.ON_REQUEST_TOKEN_RECEIVED, OAuthEvent.ON_REQUEST_TOKEN_FAILED, ON_ACCESS_TOKEN_RECEIVED and ON_ACCESS_TOKEN_FAILED
+	c. call requestToken()
+	d. on the ON_REQUEST_TOKEN_RECEIVED listener you can then ask the application user whether they are happy to be redirected to the consumer web site
+		 to authorise the application's access to the user's account. If okayed by the user, call requestAuthorisation()
+	e. The user will be given a pin number which they should enter into your application, after which you call requestAccessToken( pinNumber );
+	f. on the ON_ACCESS_TOKEN_RECEIVED listener you will get the access token/secrets that you need to persist to storage for all future secured calls to the 
+		 consumer, these are the accessPin, accessToken, accessTokenSecret (but you will also need the application ConsumerKey and ConsumerSecret for future calls)
+
+
+TO CALL CONSUMER WITH SECURED SIGNED REQUESTS
+Once authorised, create a new instance of the class and set it up with the persisted access tokens and call the getSignedURI( method, uri, postData ) to get the signed secured
+data to send to the consumer: 
+
+For example...
+	var twitauth:OAuthManager = new OAuthManager();
+	twitauth.usePinWorkflow = true;
+	twitauth.accessPin = accessPin;
+	twitauth.accessToken = accessToken;
+	twitauth.accessTokenSecret = accessTokenSecret;
+	twitauth.consumerKey = applicationConsumerKey;
+	twitauth.consumerSecret = applicationConsumerSecret;
+	twitauth.oauthDomain = "twitter.com";
+	var postData:String = twitauth.getSignedURI( "POST", "http://twitter.com/statuses/update.xml", "status=" + encodeURIComponent(tweet.text) );
+
+	var httpService:HTTPService = new HTTPService;
+	httpService.url = "http://twitter.com/statuses/update.xml";
+	httpService.useProxy = false;
+	httpService.method = "POST";
+	httpService.contentType = "application/x-www-form-urlencoded";
+	httpService.addEventListener( "result", httpPostResult );
+	httpService.addEventListener( "fault", httpPostFault );
+	httpService.send( new QueryString( postData ).toPostObject() );

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" minWidth="955" minHeight="600"
+			   creationComplete="creationComplete()" 
+			   width="600" height="320" 
+			   >
+	<fx:Script>
+		<![CDATA[
+			import adobe.utils.CustomActions;
+			
+			import com.adobe.net.URI;
+			import com.adobe.serialization.json.JSON;
+			import com.coderanger.EvernoteAPI;
+			import com.coderanger.OAuthEvent;
+			import com.coderanger.OAuthManager;
+			import com.coderanger.Parameter;
+			import com.coderanger.QueryString;
+			
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.http.HTTPService;
+			
+			import org.apache.thrift.transport.THttpClient;
+		
+		
+		
+		private function creationComplete():void
+		{
+			//var ee : ExternalInterface
+			ExternalInterface.call( 'UserStoreClient.checkVersion', 'boo', 1, 3 )
+		//	var ee : EvernoteAPI = new EvernoteAPI('brthrmnss', '12121212' );
+ 			//	var transport : THttpClient = new THttpClient()
+		}
+		
+		
+		private var accessPin:Number;
+		private var accessToken:String;
+		private var accessTokenSecret:String;
+		private var customerName:String;
+		
+		]]>
+	</fx:Script>
+	
+	
+ 
+				   
+			   
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+ 
+</s:Application>

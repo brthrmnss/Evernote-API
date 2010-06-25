@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" 
+	  backgroundColor="0xFFFFFF" 
+	 creationComplete="onInit()" 
+	 implements="org.robotlegs.popups.view.popups.IPopup" >
+	<!--
+		
+	>
+	-->
+	<mx:Script>
+		<![CDATA[
+			import mx.core.UIComponent;
+			
+			import sss.Shelpers.Shelpers.Shelpers;
+			import sss.Shelpers.Shelpers.ShelpersUI;
+			import sss.Shelpers.Shelpers.other.TweenerHelpers;
+			import sss.Shelpers.Shelpers.ui.PopupCode;
+				
+			public function onInit() : void 
+			{
+				var ee : MouseEvent
+				this.popupCode.center()
+	 		}
+	 
+	 		public  function create(app:Object ) : IPopup
+			{
+	 			var popup  :   stockprice_popup = new stockprice_popup()
+				popup._popupCode =     PopupCode.Create( popup ,app ) 
+	 			return popup			
+			} 
+	 		
+		/* 	private var _popupName : String = ''; 
+			public function get  popupName () : String { return _popupName  } 
+			public function set  popupName ( _popupName_ : String) : void {   _popupName = _popupName_  } 
+			 */
+	 		private var _popupCode :   PopupCode; 
+	 		public function get  popupCode () : PopupCode { return _popupCode  } 
+			public function set  popupCode ( _popupCode_ : PopupCode) : void {   _popupCode = _popupCode_  } 
+			
+	 		 public function show()  : void
+	 		 {
+	 		 	this.popupCode.open( false, false ) 
+	 		 	this.startS()
+	 	/* 	 	this.model.uiModel.parentApplication.modal.visible = true; 
+	 		 	TweenerHelpers.TProp( this.model.uiModel.parentApplication.modal, 'alpha', 0.6 ) */
+	 		 }
+	 		 public function hide( ) : void
+	 		 {
+	 		/*  	if ( wait == true ) 
+	 		 	{
+	 		 		setTimeout( this.close, 750, false ) 
+	 		 	} */
+	/*  		 	var ee : ShelpersUI
+	 		 	ShelpersUI.FadeOut( this.model.uiModel.parentApplication.modal )  */
+	 		 	this.popupCode.close() 
+	 		 }
+			
+	 		public function startS()  : void
+	 		{
+	 			if ( this.popupCode.showing == false ) 
+	 				return; 
+	 			var ee :  TweenerHelpers
+	 			TweenerHelpers.TProp( this.txt, 'alpha', .2, .5 ) 
+	 			TweenerHelpers.TProp( this.txt, 'alpha', .9, .5, .5 ) 
+	 			//TweenerHelpers.
+	 			setTimeout( this.startS, 1000 ) 
+	 		}
+			
+			public function close(name : String, time : Number ) : void
+			{
+ 
+			}
+			
+			/**
+			 * Redirects objects to class
+			 * */
+			public function close2(  parameters :  Object )  : void
+			{
+				var ordererArguments : Array = []
+				var order : Array = ['name', 'time'] 
+				for each ( var prop : String in order ) 
+				{
+					ordererArguments.push( parameters[prop] ) 
+				}
+				close.apply( this, ordererArguments )
+			}
+		]]>
+	</mx:Script>
+	 
+	 <mx:Text   id="txt" text="Updating..."   fontSize="20" />
+</mx:Canvas>
+

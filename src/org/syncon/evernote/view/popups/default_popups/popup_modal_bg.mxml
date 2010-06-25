@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="init()"
+		 backgroundColor="0" backgroundAlpha="0.4" implements="org.robotlegs.popups.view.popups.IPopup" >
+    <mx:Script>
+        <![CDATA[
+			import mx.core.UIComponent;
+			import mx.managers.PopUpManager;
+			
+			import sss.Shelpers.Shelpers.Shelpers;
+			import sss.Shelpers.Shelpers.ShelpersUI;
+			import sss.Shelpers.Shelpers.other.TweenerHelpers;
+			import sss.Shelpers.Shelpers.ui.PopupCode;
+        
+			private var creationComplete:Boolean = false
+	
+	        public function init(): void
+	        {
+	        	//this.setStyle('backgroundColor', 0xECE9D8 )
+	            ShelpersUI.removeScrollbars(this)
+	            this.creationComplete = true
+	            this.popupCode.setupListenerForResize_Scrolling_Movement_Of(this.parentApplication,
+	                this.onResizedOrMovedHandler)
+	            this.addEventListener(MouseEvent.CLICK, this.onClicked)
+	            this.doubleClickEnabled = true
+	            this.addEventListener(MouseEvent.DOUBLE_CLICK, this.onClicked)
+	        }
+	
+	        public function onClicked( e:Event ): void
+	        {
+	            this.adjustLayer()
+	        }
+			
+			private var _popupCode :   PopupCode; 
+			public function get  popupCode () : PopupCode { return _popupCode  } 
+			public function set  popupCode ( _popupCode_ : PopupCode) : void {   _popupCode = _popupCode_  } 
+			
+	        public function create( app:Object ): IPopup
+	        {
+	            var popup:popup_modal_bg = new popup_modal_bg()
+	            popup.popupCode = PopupCode.Create(popup, app)
+	           // popup.popupCode.adjustAlpha = false; 
+	            return popup
+	        }
+	
+			/**
+			 * Places parent popups on top of thier children ....
+			 * */
+	        public function adjustLayer(): void
+	        {
+	             var index : int = systemManager.popUpChildren.getChildIndex( DisplayObject(this) )
+	        	var changedPopupSetting :  Boolean = false
+/* 	        	if ( this.model.indexingPopups == false ) 
+	        	{
+		 			this.model.indexingPopups = true
+		 			changedPopupSetting = true; 
+	        	}
+	             Shelpers.traceS('popup index at', index)	        	
+	        	if ( this.popupCode.showing  == false ) 
+	        	{
+		 	  		 if ( changedPopupSetting ) 
+		 	   			this.model.indexingPopups = false 	        	        		
+	        		return; 
+	        	}
+	        		
+	
+	            //excessive looping when closing all popups
+	            for each (var j:Object in this.model.popupsAutoClose) //.popUpChildren )
+	            {
+	                if ( j == null ) continue;
+	
+	                if ( j.popupCode.showing && j != this ) {
+	                    this.popupCode.bringToFront()
+	                    j.popupCode.bringToFront()
+	          
+	            } */
+	            //if an alert, or a confirm popup is open, bring that to the front last
+	/*             if ( this.model.popupConfirm.popupCode.showing ) 
+	            	this.model.popupConfirm.popupCode.bringToFront() */
+
+
+	            systemManager.popUpChildren.setChildIndex(DisplayObject(this), systemManager.popUpChildren.numChildren - 2)
+	             index  = systemManager.popUpChildren.getChildIndex( DisplayObject(this) )
+	             
+/* 	            	
+	            if ( this.model.uiModel.currentState == UiModel.UiState_Outfits ) 
+	            {
+	            	this.bringPopupsToFrontIfVisible( [ this.model._popupOutfit, this.model.popupBottomClothingSearch, 
+	            		this.model._popupClothingSearchLeft, this.model._popupUploadPic,
+	            		this.model._popupClothingCart, this.model._popupMannqeuinn ] ) 
+	            	//bring output popup and clipboard/mannaegue and quicksearch up if showing 
+	            }	             
+	             
+	            if ( this.model._popupImportExcel != null && this.model.popupImportExcel.popupCode.showing ) 
+	            {
+	            	this.bringPopupsToFrontIfVisible( [ this.model.popupImportExcel, this.model.popupPickColor, 
+	            		this.model.popupImportCategoryDisplay]  ) 
+	            	//bring output popup and clipboard/mannaegue and quicksearch up if showing 
+	            }	    	             
+	             
+	            if ( this.model._popupEvent != null && this.model.popupEvent.popupCode.showing  ) 
+	            {
+	            	this.bringPopupsToFrontIfVisible( [  this.model.popupBottomClothingSearch, 
+	            		this.model._popupClothingSearchLeft,  this.model._popupUploadPic,
+	            		this.model._popupClothingCart  ] ) 
+	            	//bring output popup and clipboard/mannaegue and quicksearch up if showing 
+	            }	    
+				 */
+				
+	             //this final set of popups goes on top of everything else ...
+	             //most important ones last 
+			/* 		
+	            var putOnTopIfShowing2  : Array = [ this.model._popupUploadPic,  this.model._popupUploadMultiplePics  ]
+	            
+	            var putOnTopIfShowing  : Array = [ this.model._popupLogin, this.model._popupRegister, 
+	            this.model.popupInfo, this.model.popupAlert  ]	            
+	            
+	            this.bringPopupsToFrontIfVisible( putOnTopIfShowing2, false ) 	            
+	            this.bringPopupsToFrontIfVisible( putOnTopIfShowing, true ) 
+	             */
+ 
+	        }
+	
+			public function bringPopupsToFrontIfVisible(popups : Array, bringModalBehindIt : Boolean = false )  : void
+			{
+	            for each (var popup:Object in popups) 
+	            {
+	                if ( popup == null ) continue;
+	                if ( popup.popupCode.showing && popup != this ) 
+	                {
+	                	if ( bringModalBehindIt  ) this.popupCode.bringToFront()
+	                    popup.popupCode.bringToFront()
+	                }
+	            }
+			}
+	 
+	
+	 		  public static var SHOWING_MODAL_POPUP : String = 'showing modal' 
+			  public static var HIDING_MODAL_POPUP : String = 'HIDING_MODAL_POPUP modal' 				
+	        public function open( toggle:Boolean = false ): void
+	        {
+	            var showingWhenOpened:Boolean = this.popupCode.showing
+	            this.popupCode.open(false, true, true)
+	
+	            //go from small to large b/c ur extra
+	            this.resize();//showingWhenOpened == false)
+	
+	            this.adjustLayer()
+	            //SystemManager.
+	
+	
+	            //this.model.closePopups( this )
+	
+	
+	            //this.model.uiModel.modalOpen( this )
+	
+	            var bg:Object = [ this.alpha, this.popupCode.showing ]
+	            
+	            if ( this.popupCode.showing ) 
+	            {
+	            	this.dispatchEvent( new Event (SHOWING_MODAL_POPUP ) ) 
+	            }
+	        }
+	
+	        public function resize( startSmall:Boolean = false ): void
+	        {
+	            if ( startSmall ) {
+	                this.width = 0
+	                this.height = 0
+	            }
+	            else
+	            {
+	            	this.width = this.parentApplication.width; 
+	            }
+	            this.x = this.parentApplication.width / 2 - this.width / 2
+	            
+	            this.y = this.parentApplication.height / 2 - this.height / 2
+	            this.y = 0
+	            //bouce back
+	            var time:Number = 0.3
+	            var trans:String = TweenerHelpers.BouceBack
+	            trans = TweenerHelpers.Default
+				//TweenerHelpers.removeTweens( this ) 	            
+	            TweenerHelpers.TProp(this, 'width', this.parentApplication.width, time, 0, trans)
+	            TweenerHelpers.TProp(this, 'height', this.parentApplication.height, time, 0, trans)
+	            TweenerHelpers.TProp(this, 'x', 0, time, 0, trans)
+	            TweenerHelpers.TProp(this, 'y', 0, time, 0, trans)
+	        }
+	
+	        public function resize2( startSmall:Boolean = false ): void
+	        {
+	        	if ( this.popupCode.showing == false ) 
+	        		return;
+	            this.width = this.parentApplication.width
+	            this.height = this.parentApplication.height
+	        }
+	
+	        public function onResizedOrMovedHandler( e:Event ): void
+	        {
+	            this.callLater(this.resize2)
+	        //this.resize()
+	        }
+	
+	        public function close(): void
+	        {
+	            //this.model.uiModel.modalClose( this )
+	           /*  TweenerHelpers.removeTweens( this ) 
+	            TweenerHelpers.TProp(this, 'width', 0, 0.5)
+	            TweenerHelpers.TProp(this, 'height', 0, 0.5)
+	            TweenerHelpers.TProp(this, 'x', this.parentApplication.width / 2, 0.5)
+	            TweenerHelpers.TProp(this, 'y', this.parentApplication.height / 2, 0.5)
+ */
+				TweenerHelpers.removeTweens( this ) 
+	            TweenerHelpers.TProp(this, 'width', this.parentApplication.width, 0.5)
+	            TweenerHelpers.TProp(this, 'height', 0, 0.5)
+	            //TweenerHelpers.TProp(this, 'x', this.parentApplication.width / 2, 0.5)
+	            TweenerHelpers.TProp(this, 'y', this.parentApplication.height, 0.5)
+	            
+				if ( this.popupCode.showing ) 
+				{
+					this.dispatchEvent( new Event (SHOWING_MODAL_POPUP ) ) 
+				}
+	            this.popupCode.close()
+	        }
+
+			
+			public function show()  : void
+			{
+				this.open()
+				//this.popupCode.open( false, false ) 
+				//this.startS()
+			}
+			public function hide( ) : void
+			{
+				this.close()
+				//this.popupCode.close() 
+			}
+
+			
+        ]]>
+    </mx:Script>
+</mx:Canvas>

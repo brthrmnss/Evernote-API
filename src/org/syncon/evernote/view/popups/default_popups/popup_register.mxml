@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" 
+	 creationComplete="init()" 
+	 verticalScrollPolicy="off"  horizontalScrollPolicy="off"
+	  xmlns:code="http://code.google.com/p/flexlib/"  styleName="popupSkin"
+	    xmlns:popups="sss2.Onenote.views.popups.*" xmlns:Utils="sss2.Onenote.Utils.*" 
+	    xmlns:ui="sss.Shelpers.Shelpers.ui.*" xmlns:Utils1="sss2.Ecloseto.Utils.*"
+	     xmlns:ns="sss2.StockTwits.views.users.login.user_control_panel.*"
+	     xmlns:supporting="sss2.Ecloseto.views.popups.supporting.*">
+
+    <!---
+    -->
+    <mx:Script>
+        <![CDATA[
+        	import sss2.Ecloseto.vos.EclosetoAccessVO;
+        	import sss2.Ecloseto.Utils.FormHelpers_Stylize;
+        	import sss.Shelpers.Shelpers.FilterHelpers;
+        	import sss2.Ecloseto.EclosetoModel;
+        	import sss2.JrlV4.vos.UserVO;
+        	import sss.Shelpers.Shelpers.Shelpers;
+        	import sss2.JrlV4.JrlV4Model;
+        	import sss.Shelpers.Shelpers.other.Tweener.TweenerTricks;
+
+	        import sss.Shelpers.Shelpers.ui.PopupCode;
+	        import sss.Shelpers.Shelpers.other.other.StringUtils;
+	        import sss.Shelpers.Shelpers.other.TweenerHelpers;
+	
+	        import mx.events.ResizeEvent;
+	        import mx.core.UIComponent;
+	        import sss.Shelpers.Shelpers.ShelpersUI;
+	
+	        public var hardcodedPassword:String = ''
+	        public var hardcodedUsername:String = ''
+	        public var hardcodedSuccessFx:Function;
+	
+	        ////////////////////////////////// fxs
+	
+	        [Bindable]public var model: JrlV4Model = JrlV4Model.getInstance();
+	 		[Bindable] public var eclosetoModel : EclosetoModel = EclosetoModel.getInstance();
+	 			
+	        [Bindable]public var required:Boolean = false; //offer the user no way to escape
+	
+	        [Bindable]public var registerFx:Function
+		 
+	        public var callCompleteFx:Function;
+	        
+			public var creationComplete : Boolean = false;
+			/**
+			 * Indicates whether custom access should be created
+			 * */ 	        
+	        private var customAccess  : Boolean = false;
+	        public var access : EclosetoAccessVO = new EclosetoAccessVO() 
+				public function init() :void
+				{
+					ShelpersUI.pad( this ) 
+			/* 		
+					if ( this.model.uiModel.loggedIn )
+					{
+						Shelpers.alert('You are already logged in, log out before continuing')
+						this.enabled = false
+					}
+					else
+					{
+					 
+					} */
+					
+
+						
+					//this.popupCode.styleMeNicely()
+					 //this.notwork.text = 'Join the premeir Worldwide Vdieo Superhighway!'//this.model.scenewaveMotto; ///
+					 
+					 this.txtIntro.htmlText = '<b><font size="20">The easiest way to organize your clothes and your style.  </font></b> <br /><br />'
+					 this.txtIntro.htmlText += '<font size="20">Add your Clothes. Create Outfits. Track when you wore each item. Search for the perfect item.</font>'
+	
+					//var ee : FilterHelpers
+					//FilterHelpers.addLightDropShadow( this.col2,  5, 45 ,  2) 
+					//FilterHelpers.addGlow( this.col2, 0xffffff, 4, 1 )
+					var ee :  FormHelpers_Stylize
+					FormHelpers_Stylize.formatForm( this.userform.form,  100,  350  , '', [ ] )
+					FormHelpers_Stylize.formatForm( this.formExtra, 100,  350 , '', [this.saveButton] )
+					
+					this.comboType.dataProvider = [this.TypePersonalUser, this.TypeServiceProviderUser]
+					
+					this.creationComplete = true; 
+				}
+	 
+	 			public function hasten () : void
+	 			{
+	 				this.userform.user.username = 'bbbbbbb_'+StringUtils.generateRandomString(4) //String( Math.floor((Math.random()*80)) ) 
+	 				this.userform.user.username = 'FR33DDY'
+	 				this.userform.user.password = '111111'
+	 				this.userform.newPassword1.text = this.userform.newPassword2.text   = '111111'
+	 				this.user.email =this.userform.email.text = 'morrisonstephen@gmail.com'
+	 				 
+	 				//this.chBox_terms.selected = true
+	 			}
+	 
+	 			[Bindable] public var user :  UserVO = new UserVO();
+	 			
+	 			public function ok ()  :  void 
+	 			{
+	 				//clear any screens somehow
+	 			}
+	 			
+	 			public function fail() : void
+	 			{
+	 				
+	 			}
+				 //public var w :  
+	 			public function onComplete() : void
+	 			{
+	 				//see if user is ok and has proper id .... 
+	 				var werwe : Shelpers
+	 				if ( this.userform.verifyPasswords() == false ) return; 
+	 			/* 	if ( Shelpers.alert_ifTrue( this.chBox_terms.selected == false , 
+	 						this.model.uiModel.loginLanguage.registerProblem_YouMustAgreeToTheTermsAndConditions )  ) return; 
+	 	 */
+	 				this.model.currentUser = new   UserVO()
+	 				//
+	 				this.user.id = 0
+	 				//this.leadForm.newEntry.id = 0 //what about dfs?
+	 				//this.leadForm.initEntry()
+	 				this.userform.copyToUser( this.user ) 
+	 				this.model.loginFxs.register( this.user, null, null, this ) //dont' sent any complete fxs ...  
+	 				this.status.text = this.model.uiModel.loginLanguage.step1 //'Step 1 of 3 - Saving registration'
+	 			}			 
+	 
+	 			/**
+	 			 * Cloeses form and helps user login 
+	 			 * need to get the user objects from the server, 
+	 			 * 		---- might just store it on the userlogin for now
+	 			 * creates access object if specified, and calls itself again when finished
+	 			 * */
+	 			public function registration_succesful( e : String = '' )  : void
+	 			{
+						if ( this.customAccess ) 
+						{
+							this.status.text = 'Step 2 of 3 Customizing Profile....'
+							this.eclosetoModel.remoteFxs.accessCreate( this.user.id , this.access, this.registration_succesful  )
+							this.customAccess = false; 
+							return;
+						}	
+	 			
+	 			
+	 				Shelpers.traceS('done ... succesf uuly registrered' )
+	 				
+	 				this.status.text = this.model.uiModel.loginLanguage.finishedRegistration // 'Finished...'
+					//this.model.infoPopup.load(
+					//var ee : message_popup 
+				
+				
+					this.onClose()
+					this.eclosetoModel.popupLogin.show('Login to begin...', false );
+					this.eclosetoModel.popupLogin.username.text = this.user.username; 
+				
+					this.resetForm()
+				
+					this.eclosetoModel.popupInfo.load( 'Finished...', 
+						'Created Account'+'<br />'+'Succesfully Registered, you may now login.' //Check your E-mail for a message.'
+	 				, true, true ) ; 				 			
+	 			
+				/* 	this.eclosetoModel.popupInfo.load( this.eclosetoModel.uiModel.loginLanguage.finishedRegistration, 
+						this.model.uiModel.loginLanguage.accountConfirmationPopupMsg+'<br />'+this.model.uiModel.loginLanguage.confirmMsgSentToYourAddress 
+	 				, true, true ) ;  */
+	 			
+	 			}
+	 			
+	 			public function registration_failed( e : String )  : void
+	 			{
+	 				this.status.text = e 
+	 			}
+	 			
+	 			/**
+	 			 * Clears input of the form
+	 			 * */
+	 			public function resetForm()  : void
+	 			{
+	 				//this.btnCreateAccount.enabled = false
+	 				this.userform.clear()
+	 				//this.col2.enabled = false
+	 				
+					if ( this.model.debugMode )  
+						this.hasten()	 				
+					
+					this.access = new EclosetoAccessVO()
+					this.customAccess = false; 
+					this.comboType.selectedIndex = 0; 	 				
+	 			}
+	 			
+	 			public function onTermsOfUse()  : void
+	 			{
+	 				//this.model.loginLanguage.onTOS()
+	 			}
+	 			
+	 			public function onPrivacyPolicy()  : void
+	 			{
+	 				//this.model.loginLanguage.onPrivacyPolicy(); //.infoPopup.load(  this.model.uiModel.loginLanguage.privacyPolicy, this.model.uiModel.loginLanguage.privacyPolicyText )
+	 			}
+	 			
+	 			public function onCommunityAgreement() : void
+	 			{
+	 				//this.model.loginLanguage.onCommunityAgreement()
+	 			}
+	 			
+	 
+	        public var atEndCallFx:Function;
+	        public var atEndCallFxArgs:Array;
+	
+	        public function open(  allowCancel:Boolean = true, atEndCallFx:Function = null,
+	            args:Array = null ): void
+	        {
+	        	this.eclosetoModel.uiModel.openModalPopup( this )  
+	        	if ( this.creationComplete == false ) 
+	        	{
+	        		setTimeout( this.open, 500,allowCancel, atEndCallFx )
+	        		return;
+	        	}
+	        	TweenerHelpers.removeTweens( this ) 
+	            this.popupCode.open(   false, true , true ) 
+	        /*     this.message = msg;
+	            this.atEndCallFx = atEndCallFx
+	            this.atEndCallFxArgs = args
+	            this.showCancelButton = allowCancel */
+				
+				this.resetForm()
+				
+				
+				var pW : Number =990; // Math.max( 750, this.parentApplication.width) * .8
+				this.width = 0
+				TweenerHelpers.TProp( this,  'width',  pW , 1) 
+	        }
+	 
+	
+	        [Bindable]public var showCancelButton:Boolean = true;
+	
+	        [Bindable]public var message:String = ''
+	
+	 
+	 			static public function create(app:Object )  :     popup_register_style
+				{
+		 			var popup  :   popup_register_style = new popup_register_style()
+		 			popup.popupCode =     PopupCode.Create( popup ,app ) 
+		 			return popup			
+				} 
+	 			
+	 			public var popupCode :    PopupCode; 
+	 
+			
+			public function onClose()  : void
+			{
+				this.popupCode.close()
+				this.eclosetoModel.uiModel.closeModalPopup( this ) 
+			}
+			
+			public function onLearnMore()  : void
+			{
+				this.eclosetoModel.onLearnMore()
+			}
+			
+			public function onSignIn() : void
+			{
+				this.onClose()				
+				this.eclosetoModel.popupLogin.show(); //.popup.model.uiModel.onLogin()
+			}
+			
+			public var TypePersonalUser : String = 'I only dress myself'
+			public var TypeServiceProviderUser : String = 'I dress other people'
+			
+			/**
+			 * Called When combo changed, 
+			 * updates the custom access object
+			 * */
+			public function onChangeAccountTypeCombo(userChange : Boolean = true) : void
+			{
+				if ( this.comboType.selectedLabel == TypePersonalUser )
+				{
+					this.lblAccountTypeExplaination.text = ""
+					this.access.membership_type = EclosetoModel.MembershipType_RegularUser					
+				}
+				if ( this.comboType.selectedLabel == TypeServiceProviderUser )
+				{
+					this.lblAccountTypeExplaination.text = "You're a Personal Shopper, Fashion Assistant, Designer, etc"
+					this.access.membership_type = EclosetoModel.MembershipType_ServiceProvider
+				}	
+				if ( userChange ) 
+				{
+					this.customAccess = true
+				}
+			}
+        ]]>
+    </mx:Script>
+ 
+	<mx:HBox paddingTop="20" paddingBottom="20">
+	
+ 		<mx:Canvas  width="450"  color="0x5175A1">
+ 			<ui:TextArea2 id="txtIntro"  x="30" y="80" width="400" height="350" />
+ 			<Utils1:eButton label="Learn More"  horizontalCenter="0" y="280" click="onLearnMore()"/>
+			<mx:LinkButton label="Already have an Account?" 
+				 bottom="0" right="10"
+				click="{this.onSignIn()}" /> 			
+ 		</mx:Canvas>
+ 		       <Utils1:vrule width="1" height="99%" />
+            
+		<mx:VBox id="col2"  paddingTop="10" paddingLeft="10"  >
+				 <mx:Spacer height="10" />
+				<mx:Label text="Create Your StyleSwift Account"   fontSize="20"  fontWeight="bold"/>
+				<mx:Label text="" paddingRight="20"   id="status" />
+				<supporting:user_form  user="{this.user}"  id="userform"/>
+				<!--<ns1:user_lead_form user="{this.user}"  id="leadForm"/>-->
+				<mx:Form labelWidth="100"  paddingTop="0" id="formExtra">
+						<mx:FormItem paddingTop="0"  label="Intended Usage">
+							<!--<mx:HBox  horizontalGap="-5" verticalAlign="middle">-->
+								<mx:ComboBox id="comboType"  change="{this.onChangeAccountTypeCombo()}"/>							
+								<mx:Label  id="lblAccountTypeExplaination" />
+			  				<!-- </mx:HBox> --> 
+						</mx:FormItem>				
+						<mx:FormItem paddingTop="0">
+							<mx:HBox  horizontalGap="2" verticalAlign="bottom">
+								<mx:CheckBox id="chkBox"  label=" " />
+								<mx:Label text="I agree to the" />
+									<Utils1:ClearLinkButton textDecoration="underline"  fontWeight="bold" 
+										text="{this.model.uiModel.loginLanguage.termsOfUse}." fx="{this.onTermsOfUse}" />
+									<mx:Label text="and"/>
+									<Utils1:ClearLinkButton textDecoration="underline"  fontWeight="bold" 
+										 text="{this.model.uiModel.loginLanguage.privacyPolicy}." fx="{this.onPrivacyPolicy}" />								
+			  				</mx:HBox> 
+						</mx:FormItem>
+ 
+						<mx:FormItem id="saveButton" > 
+							<mx:Button  styleName="niceBtnSkin" label="{this.model.uiModel.loginLanguage.createAcctBtnLbl}" 
+								 id="btnCreateAccount" click="onComplete()" />
+					</mx:FormItem>					
+					
+				</mx:Form>
+				
+				
+				
+		</mx:VBox>		
+		
+	</mx:HBox>
+  	<Utils:CloseBtn fx="{this.onClose}" right="30"  visible="false"  top="30" /> 
+</mx:Canvas>
+

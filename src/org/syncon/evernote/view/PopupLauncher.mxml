@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"  creationComplete="{init()}"
+		 xmlns:ui="org.robotlegs.stockchart.view.ui.*" xmlns:view="org.robotlegs.stockchart.view.*"
+	 >
+
+	<mx:Script>
+		<![CDATA[
+			import sss.Shelpers.Shelpers.ShelpersUI;
+			
+			public function init()  : void
+			{
+				ShelpersUI.removeScrollbars( this )
+			}			
+ 		
+						
+		]]>
+	</mx:Script>
+ 
+	<mx:HBox>
+		<mx:Button label="Stock Popup"  id="btnStock" />
+		<mx:Button label="Popup 1 (toggle)" id="btnPopup1" />
+		<mx:Button label="Popup 2"  id="btnPopup2" />
+		<mx:Button label="Popup 3" id="btnPopup3" />
+		<mx:Button label="Popup Alert" id="btnAlert" />
+		<mx:Button label="Popup Confirm" id="btnConfirm" />		
+	</mx:HBox>
+</mx:Canvas>

@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" minWidth="955" minHeight="600"
+			   creationComplete="creationComplete()" 
+			   width="600" height="320" 
+			   >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.serialization.json.JSON;
+			import adobe.utils.CustomActions;
+			
+			import com.adobe.net.URI;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.http.HTTPService;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			
+			import com.coderanger.OAuthManager;
+			import com.coderanger.OAuthEvent;
+			import com.coderanger.QueryString;
+			import com.coderanger.Parameter;
+			
+			
+			private var _twitauth:OAuthManager = new OAuthManager();
+			
+			private function creationComplete():void
+			{
+				/* 	
+				var settingsFile:File = File.applicationStorageDirectory.resolvePath( "settings.xml" );
+				if( settingsFile.exists )
+				{
+				var fsSettings:FileStream = new FileStream();
+				fsSettings.open( settingsFile, FileMode.READ );
+				var xmlSettings:XML = new XML( fsSettings.readUTFBytes( fsSettings.bytesAvailable ) );
+				fsSettings.close();	
+				
+				accessPin = xmlSettings.accesspin;
+				accessToken = xmlSettings.accesstoken;
+				accessTokenSecret = xmlSettings.accesstokensecret;
+				customerName = xmlSettings.username;
+				key.text = xmlSettings.applicationkey;
+				secret.text = xmlSettings.applicationsecret;
+				pin.text = accessPin.toString();
+				user.text = customerName;
+				}
+				*/
+				
+				
+				key.text = 'brthrmnss'
+				secret.text = '770a8c70efe93e94'
+				
+				
+				this.onGetPin(); 
+				
+				key.enabled = true;
+				secret.enabled = true;
+				getpin.enabled = true;
+				
+				pin.enabled = false;
+				authorise.enabled = false;
+				
+				tweet.enabled = false;
+				dotweet.enabled = false;
+				getuserdetails.enabled = false;
+				
+				
+				if( accessPin > 0 && accessToken.length && accessTokenSecret.length && key.text.length && secret.text.length )
+				{
+					key.enabled = false;
+					secret.enabled = false;
+					getpin.enabled = false;
+					
+					tweet.enabled = true;
+					dotweet.enabled = true;
+					getuserdetails.enabled = true;
+				}
+				
+				_twitauth.addEventListener( OAuthEvent.ON_REQUEST_TOKEN_RECEIVED, onRequestTokenReceived );				
+				_twitauth.addEventListener( OAuthEvent.ON_REQUEST_TOKEN_FAILED, onRequestTokenFailed );				
+				_twitauth.addEventListener( OAuthEvent.ON_ACCESS_TOKEN_RECEIVED, onAccessTokenReceived );				
+				_twitauth.addEventListener( OAuthEvent.ON_ACCESS_TOKEN_FAILED, onAccessTokenFailed );
+				_twitauth.usePinWorkflow = true;
+			}
+			
+			private function onRequestTokenReceived( evt:OAuthEvent ):void
+			{
+				Alert.show( "Do you want to authorise this application to access your account details?\n\nYou will be redirected to a web page to approve or deny this access.", "Approve Application", Alert.YES | Alert.NO, null, onRequestTokenAlert, null, Alert.YES );
+			}
+			
+			private function onRequestTokenFailed( evt:OAuthEvent ):void
+			{
+				Alert.show( "Sorry a problem occurred and we could not verify your account\n\n" + evt.data, "Approve Application", Alert.OK );
+			}
+			
+			private function onRequestTokenAlert( event:CloseEvent ):void
+			{
+				if( event.detail == Alert.YES )
+				{
+					pin.enabled = true;
+					authorise.enabled = true;
+					
+					_twitauth.requestAuthorisation();
+				}
+				else
+				{
+					_twitauth.reset();
+				}
+			}
+			
+			private function onGetPin():void
+			{
+				if( key.text.length && secret.text.length )
+				{
+					key.enabled = false;
+					secret.enabled = false;
+					getpin.enabled = false;
+					
+					_twitauth.consumerKey = key.text;
+					_twitauth.consumerSecret = secret.text;
+					_twitauth.oauthDomain = "twitter.com";
+					_twitauth.oauthDomain = 'sandbox.evernote.com' //evernote.com/OAuth.action'
+					_twitauth.requestToken();
+				}
+				else
+				{
+					return;
+				}
+			}
+			
+			private function onAuthorise():void
+			{
+				if( pin.text.length != 7 )
+				{
+					Alert.show( "Sorry the PIN number is incorrect, it must be 7 numbers", "Approve Application", Alert.OK );
+					return;
+				}
+				
+				if( !_twitauth.validatePin( pin.text ) )
+				{
+					Alert.show( "Sorry the PIN number is invalid and must have been typed incorrectly, please try and re-authorise again", "Approve Application", Alert.OK );
+					return;
+				}
+				
+				_twitauth.requestAccessToken( Number( pin.text ) );
+				
+				pin.enabled = false;
+				authorise.enabled = false;
+			}
+			
+			private function onAccessTokenReceived( evt:OAuthEvent ):void
+			{
+				tweet.enabled = true;
+				dotweet.enabled = true;
+				getuserdetails.enabled = true;
+				
+				// save our persisted values
+				accessPin = _twitauth.accessPin;
+				accessToken = _twitauth.accessToken;
+				accessTokenSecret = _twitauth.accessTokenSecret;
+				customerName = _twitauth.currentUserName;
+				user.text = customerName;
+				
+				var xmlSettings:XML = <settings></settings>;
+				xmlSettings.accesspin = accessPin;
+				xmlSettings.accesstoken = accessToken;
+				xmlSettings.accesstokensecret = accessTokenSecret;
+				xmlSettings.applicationkey = key.text;
+				xmlSettings.applicationsecret = secret.text;
+				xmlSettings.username = _twitauth.currentUserName;
+				
+				/* 
+				var settingsFile:File = File.applicationStorageDirectory.resolvePath( "settings.xml" );
+				var settingsXMLStr:String = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xmlSettings.toXMLString();
+				var fsSettings:FileStream = new FileStream();
+				fsSettings.open( settingsFile, FileMode.WRITE );
+				fsSettings.writeUTFBytes( settingsXMLStr );
+				fsSettings.close();
+				*/
+				Alert.show( "Success, pin authorisaed, you can post a tweet now", "Success" );
+			}
+			
+			private function onAccessTokenFailed( evt:OAuthEvent ):void
+			{
+				Alert.show( "Sorry a problem occurred and we could not access your account\n\n" + evt.data, "Approve Application", Alert.OK );
+			}
+			
+			
+			private function doTweet():void
+			{
+				var url:String = "http://twitter.com/statuses/update.xml";
+				
+				var twitauth:OAuthManager = new OAuthManager();
+				twitauth.usePinWorkflow = true;
+				twitauth.accessPin = accessPin;
+				twitauth.accessToken = accessToken;
+				twitauth.accessTokenSecret = accessTokenSecret;
+				twitauth.consumerKey = key.text;
+				twitauth.consumerSecret = secret.text;
+				twitauth.oauthDomain = "twitter.com";
+				var postData:String = twitauth.getSignedURI( "POST", url, "status=" + encodeURIComponent(tweet.text) );
+				
+				
+				var httpService:HTTPService = new HTTPService;
+				httpService.url = url;
+				httpService.useProxy = false;
+				httpService.method = "POST";
+				httpService.contentType = "application/x-www-form-urlencoded";
+				httpService.addEventListener( "result", httpPostResult );
+				httpService.addEventListener( "fault", httpPostFault );
+				
+				// Alternative method to posting data ... include it in the headers:
+				//				var postParams1:QueryString = new QueryString( postData );
+				//				var headers:String = "OAuth realm=\"http://twitter.com/\"";
+				//				for( var n:uint = 0; n < postParams1.length; n++ )
+				//				{
+				//					var prm:Parameter = postParams1.getParam( n );
+				//					headers += ",\n";
+				//					headers += prm.key + "=\"" + prm.valueEncoded + "\"";
+				//				}				
+				//				httpService.headers = [ new URLRequestHeader( "Authorization", headers ) ];
+				//				httpService.send();
+				
+				var postParams:Object = new QueryString( postData ).toPostObject();
+				httpService.send( postParams );
+			}
+			
+			private function httpPostResult( event:ResultEvent ):void
+			{
+				trace( "httpPostResult: " + event.result.toString() );
+				Alert.show( "Success, tweet posted", "Success" );
+			}
+			
+			private function httpPostFault( event:FaultEvent ):void
+			{
+				trace( "httpPostFault: Error " + event.statusCode + " - " + event.fault.faultString );
+				Alert.show( "ERROR. Failed to post tweet because: " + event.statusCode + " - " + event.fault.faultString, "Error" );
+			}
+			
+			
+			
+			private function getUserDetails():void
+			{
+				//				var url:String = "http://twitter.com/statuses/show/3074121417.json";
+				var url:String = "http://twitter.com/users/show.json?screen_name=" + encodeURIComponent(customerName);
+				
+				var twitauth:OAuthManager = new OAuthManager();
+				twitauth.usePinWorkflow = true;
+				twitauth.accessPin = accessPin;
+				twitauth.accessToken = accessToken;
+				twitauth.accessTokenSecret = accessTokenSecret;
+				twitauth.consumerKey = key.text;
+				twitauth.consumerSecret = secret.text;
+				twitauth.oauthDomain = "twitter.com";
+				var postData:String = twitauth.getSignedURI( "GET", url );
+				
+				
+				var httpService:HTTPService = new HTTPService;
+				httpService.url = url;
+				httpService.contentType = "application/json";
+				httpService.resultFormat = "text";
+				httpService.useProxy = false;
+				httpService.method = "GET";
+				httpService.addEventListener( "result", httpGetResult );
+				httpService.addEventListener( "fault", httpGetFault );
+				
+				var postParams:Object = new QueryString( postData ).toPostObject();
+				httpService.send( postParams );
+			}
+			
+			private function httpGetResult( event:ResultEvent ):void
+			{
+				trace( "httpPostResult: " + event.result.toString() );
+				
+				var jsonData:Object = JSON.decode( event.result.toString() );
+				Alert.show( "Success, got profile for " + jsonData.name + " from " + jsonData.location + "\n\nThey last said...\n" + jsonData.status.text, "Success" );
+			}
+			
+			private function httpGetFault( event:FaultEvent ):void
+			{
+				trace( "httpPostFault: Error " + event.statusCode + " - " + event.fault.faultString );
+				Alert.show( "ERROR. Failed to get tweet because: " + event.statusCode + " - " + event.fault.faultString, "Error" );
+			}
+			
+			
+			private function doReset():void
+			{
+				var xmlSettings:XML = <settings></settings>;
+				/* 
+				var settingsFile:File = File.applicationStorageDirectory.resolvePath( "settings.xml" );
+				var settingsXMLStr:String = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xmlSettings.toXMLString();
+				var fsSettings:FileStream = new FileStream();
+				fsSettings.open( settingsFile, FileMode.WRITE );
+				fsSettings.writeUTFBytes( settingsXMLStr );
+				fsSettings.close();
+				*/
+				
+				key.enabled = true;
+				secret.enabled = true;
+				getpin.enabled = true;
+				
+				pin.enabled = false;
+				authorise.enabled = false;
+				
+				tweet.enabled = false;
+				dotweet.enabled = false;
+				getuserdetails.enabled = false;
+				
+				
+				accessPin = 0;
+				accessToken = "";
+				accessTokenSecret = "";
+				customerName = "";
+				key.text = "";
+				secret.text = "";
+				pin.text = "";
+				user.text = "(not authenticated)";
+			}
+			
+			
+			private var accessPin:Number;
+			private var accessToken:String;
+			private var accessTokenSecret:String;
+			private var customerName:String;
+			
+		]]>
+	</fx:Script>
+	
+	
+	<mx:VBox paddingBottom="10" paddingTop="10" paddingLeft="10" paddingRight="10">
+		
+		<mx:HBox><mx:Label text="Application Consumer Key:" /><mx:TextInput id="key" text="" /></mx:HBox>
+		<mx:HBox><mx:Label text="Application Consumer Secret:" /><mx:TextInput id="secret" text="" /><mx:Button id="getpin" label="Get Pin" click="onGetPin()" /></mx:HBox>
+		<mx:HBox>
+			<mx:Label text="Pin:" /><mx:TextInput id="pin" /><mx:Button id="authorise" label="Authorise" click="onAuthorise()" />
+		</mx:HBox>
+		
+		<mx:Spacer height="5" />
+		<mx:HRule width="100%" />
+		<mx:Spacer height="5" />
+		
+		<mx:HBox><mx:Label text="Authenticated as:" /><mx:Label id="user" text="(not authenticated)" /><mx:Button label="Get User Details" id="getuserdetails" click="getUserDetails()" /></mx:HBox>
+		<mx:TextArea width="100%" height="50" id="tweet" />
+		<mx:Button label="Tweet" id="dotweet" click="doTweet()" />
+		
+		<mx:Spacer height="5" />
+		<mx:HRule width="100%" />
+		<mx:Spacer height="5" />
+		
+		<mx:Button label="Reset" id="doreset" click="doReset()" />
+		
+	</mx:VBox>
+	
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	
+</s:Application>
