@@ -332,6 +332,9 @@ import org.apache.thrift.protocol.*;
     }
 
     public function set created(created:Number):void {
+	var date : Date = new Date()
+		date.setTime( date.getTime() + created ) 
+		var dbg : Array = [ date.date, date.month, date.fullYear];
       this._created = created;
       this.__isset_created = true;
     }
@@ -752,7 +755,7 @@ import org.apache.thrift.protocol.*;
             }
             break;
           case CREATED:
-            if (field.type == TType.DOUBLE) {
+            if (field.type == TType.I64 || field.type == TType.DOUBLE ) {
               this.created = iprot.readDouble();
               this.__isset_created = true;
             } else { 

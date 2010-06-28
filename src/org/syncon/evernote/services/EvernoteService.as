@@ -166,7 +166,7 @@ package org.syncon.evernote.services
 		{
 			this.noteStore.createNote( this.auth.authenticationToken, note , handleCreateNoteFault,  this.handleCreateNote );
 		}			
-			protected function handleCreateNote(e:Object=null):void
+			protected function handleCreateNote(e: Note=null):void
 			{
 				this.dispatch( new EvernoteServiceEvent( EvernoteServiceEvent.NOTE_CREATED, e ) ) 
 			}

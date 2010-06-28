@@ -1,0 +1,5 @@
+
+the evernote service is a wrapper for the thrift service which was auto generated,
+but reuiared extensive modifications before it would run smoothly 
+
+the evernote service dispatches events as weould be expected of a n api 

@@ -78,6 +78,7 @@ package org.syncon.evernote.test.cases
 		}
 			protected function handleNoteCreated( event:EvernoteServiceEvent, o:Object ):void
 			{
+				trace();
 			/*	var notebooks : Dictionary =( event.data as  NoteCollectionCounts).notebookCounts
 				for ( var guid : String in notebooks ) 
 				{

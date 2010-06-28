@@ -11,6 +11,6 @@ package org.syncon.evernote.test.suites
 		public var testGalleryLabel:TestGalleryLabelMediation;
 		public var testGalleryViewMediation:TestGalleryViewMediation;*/
 		//public var testGalleryModel:TestEvernoteService;
-		public var testGalleryModel2:TestEvernoteServiceNotes;		
+		public var testEvernoteBasics:TestEvernoteServiceNotes;		
 	}
 }
