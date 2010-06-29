@@ -16,6 +16,7 @@ package org.syncon.evernote.test.cases
 		private var service:EvernoteService;
 		private var serviceDispatcher:EventDispatcher ;
 		private var noteCount : int = 0; 
+		private var note : Note; 
 		
 		[Before(async)]
 		public function setUp():void
@@ -39,7 +40,7 @@ package org.syncon.evernote.test.cases
 		
 		
 		[Test(async)]
-		public function testRetreiveImages():void
+		public function testCountNotes():void
 		{
 			this.serviceDispatcher.addEventListener( EvernoteServiceEvent.NOTES_COUNTED, 
 				Async.asyncHandler(this, handleNotesCounted, 8000, null, 
@@ -78,19 +79,29 @@ package org.syncon.evernote.test.cases
 		}
 			protected function handleNoteCreated( event:EvernoteServiceEvent, o:Object ):void
 			{
-				trace();
-			/*	var notebooks : Dictionary =( event.data as  NoteCollectionCounts).notebookCounts
-				for ( var guid : String in notebooks ) 
-				{
-					this.noteCount =  notebooks[guid]
-					continue
-				}
-				
-				this.createNote()*/
-				//Assert.fail('Pending Event Never Occurred');
+				//trace();
+			 	this.note = event.data as Note
+				testDeleteNote()
 			}				
 			
 		
+			
+			
+			//[Test(async)]
+			public function testDeleteNote():void
+			{
+				this.serviceDispatcher.addEventListener( EvernoteServiceEvent.NOTE_DELETED, 
+					Async.asyncHandler(this, handleDeleteNote, 8000, null, 
+						null), false, 0, true);
+				 
+				this.service.deleteNote(  this.note.guid ) 
+			}
+				protected function handleDeleteNote( event:EvernoteServiceEvent, o:Object ):void
+				{
+					trace();
+				}					
+				
+			
 		/*
 		[Test(async)]
 		public function testRetreiveImages():void
