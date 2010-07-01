@@ -2,6 +2,7 @@ package org.syncon.evernote.test.cases
 {
 	import com.evernote.edam.notestore.NoteCollectionCounts;
 	import com.evernote.edam.type.Note;
+	import com.evernote.edam.type.Notebook;
 	
 	import flash.events.EventDispatcher;
 	import flash.utils.Dictionary;
@@ -16,6 +17,7 @@ package org.syncon.evernote.test.cases
 		private var service:EvernoteService;
 		private var serviceDispatcher:EventDispatcher ;
 		private var noteCount : int = 0; 
+		private var notebooks : Array  = []
 		private var note : Note; 
 		
 		[Before(async)]
@@ -54,15 +56,19 @@ package org.syncon.evernote.test.cases
 			for ( var guid : String in notebooks ) 
 			{
 				this.noteCount =  notebooks[guid]
-				return; 
+					var nb : Notebook = new Notebook()
+						nb.guid =    guid
+					this.notebooks.push( nb ) 
+				//return; 
 				continue
 			}
 			
+			this.createNote();
 		}		
 		
 		
 		
-		[Test(async)]
+	//	 [Test(async)]
 		public function createNote():void
 		{
 			this.serviceDispatcher.addEventListener( EvernoteServiceEvent.NOTE_CREATED, 
@@ -75,13 +81,21 @@ package org.syncon.evernote.test.cases
 				"</en-note>";
 
 			var note :  Note = this.service.newNote( 'title', contents) 
+			note.notebookGuid = this.notebooks[0].guid ; 
+			note.notebookGuid = "3"
+			note.deleted = 0
+				
 			this.service.createNote( note ) 
+			
 		}
 			protected function handleNoteCreated( event:EvernoteServiceEvent, o:Object ):void
 			{
 				//trace();
 			 	this.note = event.data as Note
-				testDeleteNote()
+				//testDeleteNote()
+				//this.testUpdateNote()
+				//this.textExpungeNote()
+				this.testGetNote()
 			}				
 			
 		
@@ -91,17 +105,66 @@ package org.syncon.evernote.test.cases
 			public function testDeleteNote():void
 			{
 				this.serviceDispatcher.addEventListener( EvernoteServiceEvent.NOTE_DELETED, 
-					Async.asyncHandler(this, handleDeleteNote, 8000, null, 
+					 Async.asyncHandler(this, handleDeleteNote, 4000, null, 
 						null), false, 0, true);
 				 
-				this.service.deleteNote(  this.note.guid ) 
+			 this.service.deleteNote(   this.note.guid ) 
 			}
 				protected function handleDeleteNote( event:EvernoteServiceEvent, o:Object ):void
 				{
 					trace();
 				}					
 				
-			
+				public function textExpungeNote():void
+				{
+					this.serviceDispatcher.addEventListener( EvernoteServiceEvent.NOTE_EXPUNGED, 
+						Async.asyncHandler(this, handleExpungeNote, 4000, null, 
+							null), false, 0, true);
+					
+					this.service.expungeNote(   this.note.guid ) 
+				}
+					protected function handleExpungeNote( event:EvernoteServiceEvent, o:Object ):void
+					{
+						trace();
+					}					
+									
+					
+				public function testGetNote():void
+				{
+					this.serviceDispatcher.addEventListener( EvernoteServiceEvent.NOTE_GET, 
+						Async.asyncHandler(this, handleGetNote, 4000, null, 
+							null), false, 0, true);
+					
+					this.service.getNote(   this.note.guid ) 
+				}
+					protected function handleGetNote( event:EvernoteServiceEvent, o:Object ):void
+					{
+						trace();
+					}					
+										
+					
+				
+				//[Test(async)]
+				public function testUpdateNote():void
+				{
+					this.serviceDispatcher.addEventListener( EvernoteServiceEvent.NOTE_UPDATED, 
+						Async.asyncHandler(this, handleUpdateNote, 8000, null, 
+							null), false, 0, true);
+					var contents : String = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+						"<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml.dtd\">" +
+						"<en-note>Here's the Evernote logo:<br/>" +'x'+
+						/*	"<en-media type=\"image/png\" hash=\"" + hashHex + "\"/>" +*/
+						"</en-note>";
+					
+					this.note.content = contents
+					this.service.updateNote( note ) 
+				}
+				protected function handleUpdateNote( event:EvernoteServiceEvent, o:Object ):void
+				{
+					trace();
+				}					
+				
+				
 		/*
 		[Test(async)]
 		public function testRetreiveImages():void

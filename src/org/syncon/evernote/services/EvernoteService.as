@@ -234,6 +234,25 @@ package org.syncon.evernote.services
 					this.dispatch( new EvernoteServiceEvent( EvernoteServiceEvent.NOTES_INACTIVE_EXPUNGED_FAULT, e ) ) 
 				}					
 						
+				
+			public function getNote( note_guid : String, withContent:Boolean=true,
+									 withResourcesData:Boolean=false, withResourcesRecognition:Boolean=false,
+									 withResourcesAlternateData:Boolean=false ):void
+			{
+				this.noteStore.getNote( this.auth.authenticationToken, note_guid,
+					withContent, withResourcesData, withResourcesRecognition, withResourcesAlternateData,
+					handleGetNoteFault,  handleGetNote );
+			}			
+			
+				protected function handleGetNote(e:Object=null):void
+				{
+					this.dispatch( new EvernoteServiceEvent( EvernoteServiceEvent.NOTE_GET, e ) ) 
+				}
+				
+				protected function handleGetNoteFault(e:Object=null):void
+				{
+					this.dispatch( new EvernoteServiceEvent( EvernoteServiceEvent.NOTE_GET_FAULT, e ) ) 
+				}						
 			
 /*		
 		public function get searchAvailable():Boolean

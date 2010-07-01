@@ -41,6 +41,8 @@ package  org.syncon.evernote.events
 		public static const NOTE_DELETED_FAULT:String = "NOTE_DELETED_FAULT";		
 		public static const NOTE_EXPUNGED:String = "NOTE_EXPUNGED";
 		public static const NOTE_EXPUNGED_FAULT:String = "NOTE_EXPUNGED_FAULT";	
+		public static const NOTE_GET:String = "NOTE_GET";
+		public static const NOTE_GET_FAULT:String = "NOTE_GET_FAULT";				
 		public static const NOTES_INACTIVE_EXPUNGED:String = "NOTES_INACTIVE_EXPUNGED";
 		public static const NOTES_INACTIVE_EXPUNGED_FAULT:String = "NOTES_INACTIVE_EXPUNGED_FAULT";			
 		public static const NOTEBOOK_DELETED:String = "NOTEBOOK_DELETED";
