@@ -16,6 +16,10 @@ package org.syncon.evernote.test.cases
 	{
 		private var service:EvernoteService;
 		private var serviceDispatcher:EventDispatcher ;
+		
+		private var service2:EvernoteService;
+		private var serviceDispatcher2:EventDispatcher ;		
+		
 		private var noteCount : int = 0; 
 		private var notebooks : Array  = []
 		private var note : Note; 
@@ -28,6 +32,10 @@ package org.syncon.evernote.test.cases
 			service.eventDispatcher = serviceDispatcher;
 			service.getAuth( 'brthrmnss', '12121212' )
 			Async.proceedOnEvent( this, serviceDispatcher, EvernoteServiceEvent.AUTH_GET, 5000 );
+			
+			serviceDispatcher2 = new EventDispatcher();
+			service2 = new EvernoteService();
+			
 		}
 		
 		[After]
@@ -48,6 +56,11 @@ package org.syncon.evernote.test.cases
 				Async.asyncHandler(this, handleNotesCounted, 8000, null, 
 					null), false, 0, true);
 			this.service.findNoteCounts()
+			/*	
+			this.note = new Note()
+			this.note.guid = '40b5d392-7fa4-4120-8cc3-980b733faf13'
+			this.testGetNote()
+			*/	
 		}
 		
 		protected function handleNotesCounted( event:EvernoteServiceEvent, o:Object ):void
@@ -82,8 +95,13 @@ package org.syncon.evernote.test.cases
 
 			var note :  Note = this.service.newNote( 'title', contents) 
 			note.notebookGuid = this.notebooks[0].guid ; 
-			note.notebookGuid = "3"
-			note.deleted = 0
+			note.active = true; 
+			//note.active = false; 
+			note.title= 'ss'
+			note.created = new Date().getTime()
+			note.updated = note.created
+			//note.notebookGuid = "3"
+			//note.deleted = 0
 				
 			this.service.createNote( note ) 
 			
@@ -96,6 +114,10 @@ package org.syncon.evernote.test.cases
 				//this.testUpdateNote()
 				//this.textExpungeNote()
 				this.testGetNote()
+					
+				import flash.utils.setTimeout; 
+				setTimeout( this.testGetNote, 3000 )
+					
 			}				
 			
 		
@@ -135,7 +157,14 @@ package org.syncon.evernote.test.cases
 						Async.asyncHandler(this, handleGetNote, 4000, null, 
 							null), false, 0, true);
 					
-					this.service.getNote(   this.note.guid ) 
+					//this.service.getNote(   this.note.guid ) 					
+					
+					this.serviceDispatcher2.addEventListener( EvernoteServiceEvent.NOTE_GET, 
+						Async.asyncHandler(this, handleGetNote, 4000, null, 
+							null), false, 0, true);					
+					this.service2.auth = this.service.auth
+					this.service2.getNote(   this.note.guid ) 
+						
 				}
 					protected function handleGetNote( event:EvernoteServiceEvent, o:Object ):void
 					{

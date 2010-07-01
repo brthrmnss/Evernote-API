@@ -235,7 +235,7 @@ package org.syncon.evernote.services
 				}					
 						
 				
-			public function getNote( note_guid : String, withContent:Boolean=true,
+			public function getNote( note_guid : String, withContent:Boolean=false,
 									 withResourcesData:Boolean=false, withResourcesRecognition:Boolean=false,
 									 withResourcesAlternateData:Boolean=false ):void
 			{

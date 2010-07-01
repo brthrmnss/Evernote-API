@@ -330,6 +330,7 @@ package org.apache.thrift.protocol {
     private static function reset(arr:ByteArray):void {
       arr.length = 0;
       arr.position = 0;
+	  arr.clear()
     }
   }
 }
