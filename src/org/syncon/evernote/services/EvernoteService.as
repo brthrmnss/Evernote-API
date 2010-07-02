@@ -242,6 +242,7 @@ package org.syncon.evernote.services
 				this.noteStore.getNote( this.auth.authenticationToken, note_guid,
 					withContent, withResourcesData, withResourcesRecognition, withResourcesAlternateData,
 					handleGetNoteFault,  handleGetNote );
+				return;
 			}			
 			
 				protected function handleGetNote(e:Object=null):void

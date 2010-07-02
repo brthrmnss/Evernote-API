@@ -35,6 +35,7 @@ package org.syncon.evernote.test.cases
 			
 			serviceDispatcher2 = new EventDispatcher();
 			service2 = new EvernoteService();
+			service2.eventDispatcher = serviceDispatcher2;
 			
 		}
 		
@@ -153,16 +154,23 @@ package org.syncon.evernote.test.cases
 					
 				public function testGetNote():void
 				{
-					this.serviceDispatcher.addEventListener( EvernoteServiceEvent.NOTE_GET, 
-						Async.asyncHandler(this, handleGetNote, 4000, null, 
-							null), false, 0, true);
-					
+					try 
+					{
+						this.serviceDispatcher.addEventListener( EvernoteServiceEvent.NOTE_GET, 
+							Async.asyncHandler(this, handleGetNote, 4000, null, 
+								null), false, 0, true);
+						this.serviceDispatcher2.addEventListener( EvernoteServiceEvent.NOTE_GET, 
+							Async.asyncHandler(this, handleGetNote, 4000, null, 
+								null), false, 0, true);	
+					}
+					catch(e:Error)
+					{
+						
+					}
 					//this.service.getNote(   this.note.guid ) 					
 					
-					this.serviceDispatcher2.addEventListener( EvernoteServiceEvent.NOTE_GET, 
-						Async.asyncHandler(this, handleGetNote, 4000, null, 
-							null), false, 0, true);					
-					this.service2.auth = this.service.auth
+					if ( this.service != null )	
+					this.service2.handleAuthenticateResult(   this.service.auth )
 					this.service2.getNote(   this.note.guid ) 
 						
 				}
