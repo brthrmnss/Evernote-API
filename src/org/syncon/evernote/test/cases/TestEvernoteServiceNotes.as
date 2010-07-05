@@ -53,7 +53,7 @@ package org.syncon.evernote.test.cases
 		[Test(async)]
 		public function testCountNotes():void
 		{
-			this.serviceDispatcher.addEventListener( EvernoteServiceEvent.NOTES_COUNTED, 
+			this.serviceDispatcher.addEventListener( EvernoteServiceEvent.FIND_NOTE_COUNTS, 
 				Async.asyncHandler(this, handleNotesCounted, 8000, null, 
 					null), false, 0, true);
 			this.service.findNoteCounts()
@@ -85,7 +85,7 @@ package org.syncon.evernote.test.cases
 	//	 [Test(async)]
 		public function createNote():void
 		{
-			this.serviceDispatcher.addEventListener( EvernoteServiceEvent.NOTE_CREATED, 
+			this.serviceDispatcher.addEventListener( EvernoteServiceEvent.CREATE_NOTE, 
 				Async.asyncHandler(this, handleNoteCreated, 8000, null, 
 					null), false, 0, true);
 			var contents : String = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
@@ -127,7 +127,7 @@ package org.syncon.evernote.test.cases
 			//[Test(async)]
 			public function testDeleteNote():void
 			{
-				this.serviceDispatcher.addEventListener( EvernoteServiceEvent.NOTE_DELETED, 
+				this.serviceDispatcher.addEventListener( EvernoteServiceEvent.DELETE_NOTE, 
 					 Async.asyncHandler(this, handleDeleteNote, 4000, null, 
 						null), false, 0, true);
 				 
@@ -140,7 +140,7 @@ package org.syncon.evernote.test.cases
 				
 				public function textExpungeNote():void
 				{
-					this.serviceDispatcher.addEventListener( EvernoteServiceEvent.NOTE_EXPUNGED, 
+					this.serviceDispatcher.addEventListener( EvernoteServiceEvent.EXPUNGE_NOTE, 
 						Async.asyncHandler(this, handleExpungeNote, 4000, null, 
 							null), false, 0, true);
 					
@@ -156,10 +156,10 @@ package org.syncon.evernote.test.cases
 				{
 					try 
 					{
-						this.serviceDispatcher.addEventListener( EvernoteServiceEvent.NOTE_GET, 
+						this.serviceDispatcher.addEventListener( EvernoteServiceEvent.GET_NOTE, 
 							Async.asyncHandler(this, handleGetNote, 4000, null, 
 								null), false, 0, true);
-						this.serviceDispatcher2.addEventListener( EvernoteServiceEvent.NOTE_GET, 
+						this.serviceDispatcher2.addEventListener( EvernoteServiceEvent.GET_NOTE, 
 							Async.asyncHandler(this, handleGetNote, 4000, null, 
 								null), false, 0, true);	
 					}
@@ -184,7 +184,7 @@ package org.syncon.evernote.test.cases
 				//[Test(async)]
 				public function testUpdateNote():void
 				{
-					this.serviceDispatcher.addEventListener( EvernoteServiceEvent.NOTE_UPDATED, 
+					this.serviceDispatcher.addEventListener( EvernoteServiceEvent.UPDATE_NOTE, 
 						Async.asyncHandler(this, handleUpdateNote, 8000, null, 
 							null), false, 0, true);
 					var contents : String = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +

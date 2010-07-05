@@ -36,6 +36,7 @@ package org.apache.thrift.transport {
    */
   public class THttpClient extends TTransport {
 
+	//static public var Debug : Boolean = false;
     private var request_:URLRequest = null;
     private var requestBuffer_:ByteArray = new ByteArray();
     private var responseBuffer_:ByteArray = null;
@@ -97,6 +98,7 @@ package org.apache.thrift.transport {
          if (traceBuffers_) {
            dumpBuffer(responseBuffer_, "RESPONSE_BUFFER");
          }
+		 
          callback(null);
          responseBuffer_ = null;
         });
@@ -114,6 +116,7 @@ package org.apache.thrift.transport {
       requestBuffer_.position = 0;
       request_.data = requestBuffer_;
       loader.load(request_);
+	  requestBuffer_.clear()
     }
 
     private function dumpBuffer(buf:ByteArray, prefix:String):String {
@@ -126,6 +129,7 @@ package org.apache.thrift.transport {
       } else {
         debugString = "null";
       }
+	 // if ( Debug ) 
       trace(debugString);
       return debugString;
     }

@@ -1,0 +1,306 @@
+package org.syncon.evernote.services
+{
+	
+	import com.evernote.edam.notestore.NoteFilter;
+	import com.evernote.edam.notestore.NoteStore;
+	import com.evernote.edam.notestore.NoteStoreImpl;
+	import com.evernote.edam.type.Note;
+	import com.evernote.edam.type.User;
+	import com.evernote.edam.userstore.AuthenticationResult;
+	import com.evernote.edam.userstore.Constants;
+	import com.evernote.edam.userstore.UserStore;
+	import com.evernote.edam.userstore.UserStoreImpl;
+	
+	import flash.events.Event;
+	import flash.net.URLRequest;
+	
+	import org.apache.thrift.protocol.TBinaryProtocol;
+	import org.apache.thrift.protocol.TProtocol;
+	import org.apache.thrift.transport.THttpClient;
+	import org.apache.thrift.transport.TTransport;
+	import org.robotlegs.mvcs.Actor;
+	import org.syncon.evernote.events.EvernoteServiceEvent;
+
+	public class EvernoteService extends Actor implements IEvernoteService
+	{
+		//private var service:FlickrService;
+		
+		protected  var API_CONSUMER_KEY : String = "brthrmnss";
+		protected  var API_CONSUMER_SECRET : String = "770a8c70efe93e94";
+		protected  var edamBaseUrl  : String = "https://sandbox.evernote.com";
+		
+		protected static var xmlHeader  : String = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+		protected static var docType  : String = "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml.dtd\">";
+		protected static var tNoteOpen  : String = "<en-note>";
+		protected static var tNoteClose  : String = "</en-note>";
+				
+		public var userStore : UserStore; 
+		public var  noteStore : NoteStore ;
+		public var user : User; 
+		public var  auth : AuthenticationResult;
+		
+		
+		public var username : String = ''; 
+		public var password : String = ''; 
+		
+		
+		public function EvernoteService()
+		{
+			//this.service = new FlickrService(FLICKR_API_KEY);
+		}
+		
+		public function newNote(title:String, contents:String):Note
+		{
+			var note : Note = new Note()
+			note.title = title; 
+			note.content = contents
+			
+			return note
+		}
+		
+	public function  getAuth(  login : String, pwrd : String ) : void//; // AuthenticationResult
+		{
+			var  userStoreUrl :String= edamBaseUrl + "/edam/user";
+			this.username  = login;
+			this.password =    pwrd; 
+			var  userStoreTransport : TTransport = new THttpClient( new URLRequest(userStoreUrl) );
+			var  userStoreProtocol :  TProtocol = new TBinaryProtocol(userStoreTransport);
+			userStore = new UserStoreImpl(userStoreProtocol)
+			userStore.checkVersion("Evernote Windows/3.0.1; Windows/XP SP3",
+				Constants.EDAM_VERSION_MAJOR,
+				Constants.EDAM_VERSION_MINOR,  this.handleCheckVersionFault, this.handleCheckVersionResult  );
+			/*	if (!versionOK)
+			{
+			return;
+			}*/
+			
+			
+			//var  authResult :  AuthenticationResult=
+			//user = authResult.User;
+			//return authResult;
+		}		
+		
+		public function handleCheckVersionResult(e:Object=null):void
+		{
+			userStore.authenticate(username,  password, this.API_CONSUMER_KEY, this.API_CONSUMER_SECRET,  handleAuthenticateFault, handleAuthenticateResult );
+
+		}
+		
+		public function handleCheckVersionFault(e:Object=null):void
+		{
+			
+		}				
+		
+		public function handleAuthenticateResult(e: AuthenticationResult=null):void
+		{
+			this.auth = e
+			var  noteStoreUrl : String = edamBaseUrl + "/edam/note/" + this.auth.user.shardId
+			var noteStoreTransport :  TTransport  = new THttpClient( new URLRequest(noteStoreUrl));
+			var  noteStoreProtocol : TProtocol = new TBinaryProtocol(noteStoreTransport);
+			this.noteStore =  new NoteStoreImpl(noteStoreProtocol);			
+			this.dispatch( new EvernoteServiceEvent( EvernoteServiceEvent.AUTH_GET, e ) ) 
+			
+			//this.getStore()
+		}
+		
+		public function handleAuthenticateFault(e:Object=null):void
+		{
+		}
+		
+		
+		
+		public function createNoteFilter(order:int,ascending:Boolean,words:String, 
+										 notebookGuid:String, timeZone:String, inactive:Boolean=false):NoteFilter
+		{
+			var filter:NoteFilter=new NoteFilter()
+				filter.ascending = ascending
+				filter.order = order
+				filter.words = words
+				filter.notebookGuid  = notebookGuid
+				filter.inactive = inactive
+			return filter
+		}
+		
+		
+		public function findNoteCounts(filter : NoteFilter=null, includeTrash : Boolean = false):void
+		{
+			if ( filter == null ) {filter = new NoteFilter }
+			this.noteStore.findNoteCounts( this.auth.authenticationToken, filter, includeTrash , handleNotesCountedFault,  this.handleNotesCounted );
+		}			
+			protected function handleNotesCounted(e:Object=null):void
+			{
+				this.dispatch( new EvernoteServiceEvent( EvernoteServiceEvent.NOTES_COUNTED, e ) ) ;
+			}
+			protected function handleNotesCountedFault(e:Object=null):void
+			{
+				this.dispatch( new EvernoteServiceEvent( EvernoteServiceEvent.NOTES_COUNTED_FAULT, e ) ) ;
+			}				
+	
+		public function findNotes(filter : NoteFilter=null, offset : int =0, maxNotes : int = 0):void
+		{
+			this.noteStore.findNotes( this.auth.authenticationToken, filter, offset, maxNotes, handleFindNotesFault,  this.handleFindNotes );
+		}			
+			protected function handleFindNotes(e:Object=null):void
+			{
+				this.dispatch( new EvernoteServiceEvent( EvernoteServiceEvent.FIND_NOTES, e ) ) 
+			}
+			protected function handleFindNotesFault(e:Object=null):void
+			{
+				this.dispatch( new EvernoteServiceEvent( EvernoteServiceEvent.FIND_NOTES_FAULT, e ) ) 
+			}						
+	 
+		public function getNoteTagNames(note_guid : String ):void
+		{
+			this.noteStore.getNoteTagNames( this.auth.authenticationToken, note_guid, handleGetNoteTagNames, handleGetNoteTagNamesFault );
+		}			
+			protected function handleGetNoteTagNames(e:Object=null):void
+			{
+				this.dispatch( new EvernoteServiceEvent( EvernoteServiceEvent.GET_NOTE_TAG_NAMES, e ) ) 
+			}
+			protected function handleGetNoteTagNamesFault(e:Object=null):void
+			{
+				this.dispatch( new EvernoteServiceEvent( EvernoteServiceEvent.GET_NOTE_TAG_NAMES_FAULT, e ) ) 
+			}				
+			
+		public function createNote(note :Note ):void
+		{
+			this.noteStore.createNote( this.auth.authenticationToken, note , handleCreateNoteFault,  this.handleCreateNote );
+		}			
+			protected function handleCreateNote(e: Note=null):void
+			{
+				this.dispatch( new EvernoteServiceEvent( EvernoteServiceEvent.NOTE_CREATED, e ) ) 
+			}
+			protected function handleCreateNoteFault(e:Object=null):void
+			{
+				this.dispatch( new EvernoteServiceEvent( EvernoteServiceEvent.NOTE_CREATED_FAULT, e ) ) 
+			}				
+		
+		public function deleteNote(note_guid : String ):void
+		{
+			this.noteStore.deleteNote( this.auth.authenticationToken, note_guid , handleDeleteNoteFault,  this.handleDeleteNote );
+		}			
+			protected function handleDeleteNote(e:Object=null):void
+			{
+				this.dispatch( new EvernoteServiceEvent( EvernoteServiceEvent.NOTE_DELETED, e ) ) 
+			}
+			protected function handleDeleteNoteFault(e:Object=null):void
+			{
+				this.dispatch( new EvernoteServiceEvent( EvernoteServiceEvent.NOTE_DELETED_FAULT, e ) ) 
+			}				
+					
+		public function updateNote( note :  Note ):void
+		{
+			this.noteStore.updateNote( this.auth.authenticationToken, note , handleUpdateNote,  handleUpdateNote );
+		}			
+		
+			protected function handleUpdateNote(e:Object=null):void
+			{
+				this.dispatch( new EvernoteServiceEvent( EvernoteServiceEvent.NOTE_UPDATED, e ) ) 
+			}
+			
+			protected function handleUpdateNoteFault(e:Object=null):void
+			{
+				this.dispatch( new EvernoteServiceEvent( EvernoteServiceEvent.NOTE_UPDATED_FAULT, e ) ) 
+			}					
+			
+		public function expungeNote( note_guid : String ):void
+		{
+			this.noteStore.expungeNote( this.auth.authenticationToken, note_guid , handleExpungeNoteFault,  handleExpungeNote );
+		}			
+			
+			protected function handleExpungeNote(e:Object=null):void
+			{
+				this.dispatch( new EvernoteServiceEvent( EvernoteServiceEvent.NOTE_EXPUNGED, e ) ) 
+			}
+			
+			protected function handleExpungeNoteFault(e:Object=null):void
+			{
+				this.dispatch( new EvernoteServiceEvent( EvernoteServiceEvent.NOTE_EXPUNGED_FAULT, e ) ) 
+			}					
+				
+			
+			public function expungeInactiveNotes( ):void
+			{
+				this.noteStore.expungeInactiveNotes( this.auth.authenticationToken, handleExpungeInactiveNotesFault,  handleExpungeInactiveNotes );
+			}			
+			
+				protected function handleExpungeInactiveNotes(e:Object=null):void
+				{
+					this.dispatch( new EvernoteServiceEvent( EvernoteServiceEvent.NOTES_INACTIVE_EXPUNGED, e ) ) 
+				}
+				
+				protected function handleExpungeInactiveNotesFault(e:Object=null):void
+				{
+					this.dispatch( new EvernoteServiceEvent( EvernoteServiceEvent.NOTES_INACTIVE_EXPUNGED_FAULT, e ) ) 
+				}					
+						
+				
+			public function getNote( note_guid : String, withContent:Boolean=false,
+									 withResourcesData:Boolean=false, withResourcesRecognition:Boolean=false,
+									 withResourcesAlternateData:Boolean=false ):void
+			{
+				this.noteStore.getNote( this.auth.authenticationToken, note_guid,
+					withContent, withResourcesData, withResourcesRecognition, withResourcesAlternateData,
+					handleGetNoteFault,  handleGetNote );
+				return;
+			}			
+			
+				protected function handleGetNote(e:Object=null):void
+				{
+					this.dispatch( new EvernoteServiceEvent( EvernoteServiceEvent.GET_NOTE, e ) ) 
+				}
+				
+				protected function handleGetNoteFault(e:Object=null):void
+				{
+					this.dispatch( new EvernoteServiceEvent( EvernoteServiceEvent.GET_NOTE_FAULT, e ) ) 
+				}						
+			
+/*		
+		public function get searchAvailable():Boolean
+		{
+			return true;
+		}
+				
+		public function loadGallery():void
+		{
+			service.addEventListener(FlickrResultEvent.INTERESTINGNESS_GET_LIST, handleSearchResult);
+			service.interestingness.getList(null,"",20)
+		}
+		
+		public function search(searchTerm:String):void
+		{
+			if(!this.photos)
+				this.photos = new Photos(this.service);
+			service.addEventListener(FlickrResultEvent.PHOTOS_SEARCH, handleSearchResult);
+			var p:PhotoSearchParams = new PhotoSearchParams()
+			p.text = searchTerm;
+			p.per_page = 20;
+			p.content_type = 1;
+			p.media = "photo"
+			p.sort = "date-posted-desc";
+			this.photos.searchWithParamHelper(p);				
+		}
+		
+		protected function handleSearchResult(event:Event):void
+		{
+			this.processFlickrPhotoResults(event.data.photos.photos);
+		}
+		
+		protected function processFlickrPhotoResults(results:Array):void
+		{
+			var gallery:Gallery = new Gallery();
+						
+			for each(var flickrPhoto:Photo in results)
+			{
+				var photo:GalleryImage = new GalleryImage()
+				var baseURL:String = 'http://farm' + flickrPhoto.farmId + '.static.flickr.com/' + flickrPhoto.server + '/' + flickrPhoto.id + '_' + flickrPhoto.secret;
+				photo.thumbURL = baseURL + '_s.jpg';
+				photo.URL = baseURL + '.jpg';
+				gallery.photos.addItem( photo );
+			}
+			
+			dispatch(new GalleryEvent(GalleryEvent.GALLERY_LOADED, gallery));
+		}
+		*/
+	}
+}

@@ -26,11 +26,21 @@ import org.apache.thrift.protocol.*;
         oprot_ = oprot;
       }    }
 
-    protected var iprot_:TProtocol;
+    public var iprot_:TProtocol;
     protected var oprot_:TProtocol;
 
-    protected var seqid_:int;
+    public var seqid_:int;
 
+	
+	public function reset(iprot:TProtocol, oprot:TProtocol=null):void
+	{
+		iprot_ = iprot;
+		if (oprot == null) {
+			oprot_ = iprot;
+		} else {
+			oprot_ = oprot;
+		}    }	
+	
     public function getInputProtocol():TProtocol
     {
       return this.iprot_;

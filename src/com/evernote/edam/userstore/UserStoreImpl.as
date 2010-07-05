@@ -25,8 +25,9 @@ import org.apache.thrift.protocol.*;
     protected var iprot_:TProtocol;
     protected var oprot_:TProtocol;
 
-    protected var seqid_:int;
+    public var seqid_:int;
 
+	
     public function getInputProtocol():TProtocol
     {
       return this.iprot_;
