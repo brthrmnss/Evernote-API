@@ -327,6 +327,9 @@ import org.apache.thrift.protocol.*;
       return this.__isset_contentLength;
     }
 
+	public var createdAt : Date;
+	public var updatedAt : Date;
+	
     public function get created():Number {
       return this._created;
     }
@@ -335,6 +338,7 @@ import org.apache.thrift.protocol.*;
 	var date : Date = new Date()
 		date.setTime( date.getTime() + created ) 
 		var dbg : Array = [ date.date, date.month, date.fullYear];
+		this.createdAt = date; 
       this._created = created;
       this.__isset_created = true;
     }
@@ -353,7 +357,12 @@ import org.apache.thrift.protocol.*;
     }
 
     public function set updated(updated:Number):void {
-      this._updated = updated;
+		var date : Date = new Date()
+		date.setTime( date.getTime() + updated ) 
+		this.updatedAt = date; 
+		
+		this._updated = updated;
+	  
       this.__isset_updated = true;
     }
 
