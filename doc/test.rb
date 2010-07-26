@@ -22,6 +22,7 @@ class Person
     error_block = false
     args = []
     function = false 
+    fxs = []
     name = ''
     lines = File.open("thrift/NoteStore.thrift")
 		lines.each do | line | 
@@ -69,7 +70,9 @@ class Person
         #puts 'function:'
         #puts name
         #puts args.join(', ')
-        convert(name, format_thrift_arg_strings(args))
+	#uncomment parsing functions
+        #convert(name, format_thrift_arg_strings(args))
+	fxs.push( [name, format_thrift_arg_strings(args)] )
         #convert_events(name,  format_thrift_arg_strings(args))
         next #skip last line
       end      
@@ -81,6 +84,13 @@ class Person
 				#puts line
 			end
 		end
+	i = 0	
+	5.times  do |i |
+		fxs.each do | fx_pair |
+			create_command_skeleton fx_pair[0], fx_pair[1], i
+		end
+	end
+	
 	end
 #open file
 #find functions
@@ -128,39 +138,41 @@ end
 def convert fx_name, args
 		parameters = []
 		return_types  = []
-    good = underscore(fx_name)
-    #puts good
-    good = good.upcase
+		event_name = underscore(fx_name)
+		#puts good
+		event_name = event_name.upcase
 		#fx_name = ''
 		fxFault = fx_name + 'FaultHandler'
 		fxOk= fx_name + 'ResultHandler'
 		#args = []
-		success_event_type = good #+ '_RESULT'
-		fault_event_type = good+ '_FAULT'
+		success_event_type = event_name #+ '_RESULT'
+		fault_event_type = event_name+ '_FAULT'
 		event_type = 'EvernoteServiceEvent'		
     #main fx arguments, strip out first authenticationtoken , strip out seperator 
     #arg_ = with_type(args).gsub('authenticationToken:String)', '').gsub('( ,', '') 
     fx = "
    
-		public function #{fx_name}(#{with_type(args)}):void {
+		public function #{fx_name}(#{with_type(args)}):void { 
+			this.incrementSequence()
 			noteStore.#{fx_name}(#{without_type(args)}, #{fxFault}, #{fxOk})
 		}
 			private function #{fxOk}(result:Object=null):void {
-				this.dispatch( new #{event_type}( #{event_type}.#{success_event_type}, result)) 
+				this.dispatch( new #{event_type}( #{event_type}.#{success_event_type}, result, this.getSequenceNumber() )) 
+				
 			}
 			private function #{fxFault}(result:Object=null):void {
-				this.dispatch( new #{event_type}( #{event_type}.#{fault_event_type}, result)) 
+				this.dispatch( new #{event_type}( #{event_type}.#{fault_event_type}, result, this.getSequenceNumber() )) 
 			}
 		"
     puts   fx.rstrip
   end
   
-def convert_events fx_name, args
-    good = underscore(fx_name)
-    good = good.upcase
+def convert_static_constants_for_events fx_name, args
+    event_name = underscore(fx_name)
+    event_name = event_name.upcase
  
-		success_event_type = good.to_s #+ '_RESULT'
-		fault_event_type = good+ '_FAULT'
+		success_event_type =event_name.to_s #+ '_RESULT'
+		fault_event_type = event_name+ '_FAULT'
 		success_event_type_ = fx_name + 'Result'
 		fault_event_type_ = fx_name + 'Fault'    
     fx = "
@@ -170,6 +182,125 @@ def convert_events fx_name, args
     puts   fx.rstrip
   end  
   
+  #need 3 things. mapEvent to register with framework
+  #execute portion that takes mapped events, addsevent lisneres
+  #part on event that defines type
+  #post processing - this is meat of command places on model or manipulates model
+	#sometimes is intensive, (search), sometimes drops value on model, ( getTags ), sometimes does nothing (createNote) [the creator listens for event]
+  #decontructor that removes event listeners
+  
+  #has timer built in for timeouts? fault optionso
+def create_command_skeleton fx_name, args, step
+	parameters = []
+	return_types  = []
+	event_name = underscore(fx_name)
+	#puts good
+	event_name = event_name.upcase
+	#fx_name = ''
+	fxFault = fx_name + 'FaultHandler'
+	fxOk= fx_name + 'ResultHandler'
+	#args = []
+	success_event_type = event_name #+ '_RESULT'
+	fault_event_type = event_name+ '_FAULT'
+	service_event_type = 'EvernoteServiceEvent'		
+	#main fx arguments, strip out first authenticationtoken , strip out seperator 
+	#arg_ = with_type(args).gsub('authenticationToken:String)', '').gsub('( ,', '') 
+	success_event_type =event_name.to_s #+ '_RESULT'
+	fault_event_type = event_name+ '_FAULT'
+	success_event_type_ = fx_name + 'Result'
+	fault_event_type_ = fx_name + 'Fault'    
+		
+	command_trigger_var =event_name.to_s #+ '_RESULT'
+	command_trigger_str = fx_name + 'TriggerEvent'
+	
+	command_class = "EvernoteAPICommand"
+	command_trigger_event_class = "EvernoteAPICommandTriggerEvent"
+	step += 1
+	#command trigger events	
+	if step == 1
+    code = "
+		public static const #{command_trigger_var}:String = \"#{command_trigger_str}\";		
+		"	
+		code.lstrip!
+	#command trigger event registration
+	elsif step == 2
+    code = "
+		commandMap.mapEvent(#{command_trigger_event_class}.#{command_trigger_var}, #{command_class}, #{command_trigger_event_class}, false );				
+		"
+		code.lstrip!		
+	#execute portion of command
+	elsif step == 3
+    code = "		if ( event.type == #{command_trigger_event_class}.#{command_trigger_var} ) 
+		{
+			this.service.#{fx_name}( #{without_type(args, 'event.')} )
+			this.service.eventDispatcher.addEventListener( #{service_event_type}.#{success_event_type}, this.#{fxOk} )
+			this.service.eventDispatcher.addEventListener( #{service_event_type}.#{fault_event_type}, this.#{fxFault} )
+		}	
+		"	
+	#command event handlers
+	elsif step == 4
+    code = "		private function #{fxOk}(e:EvernoteServiceEvent)  : void
+		{
+			if ( seqId != this.service.getSequenceNumber()) return; 
+			if ( this.event.fxSuccess != null ) this.event.fxSuccess(e.data);
+			//this.model.x = e.data
+			this.deReference()			
+		}		
+		
+		private function #{fxFault}(e:EvernoteServiceEvent)  : void
+		{
+			if ( seqId != this.service.getSequenceNumber()) return; 			
+			if ( this.event.fxFault != null ) this.event.fxFault(e.data);
+			this.onFault(); this.deReference()
+		}
+		"			
+		#dereference event listeners
+	elsif step == 5
+    code = "		if ( event.type == #{command_trigger_event_class}.#{command_trigger_var} ) 
+		{
+			this.service.eventDispatcher.removeEventListener( #{service_event_type}.#{success_event_type}, this.#{fxOk} )
+			this.service.eventDispatcher.removeEventListener( #{service_event_type}.#{fault_event_type}, this.#{fxFault} )
+		}	
+		"
+		#create static event properties onTrigger Event to dispatch events
+	elsif step == 6
+    code = "
+		static public function #{fx_name.capfirstletter}(#{with_type(args)}, fxSuccess : Function, fxFault: Function, alert:Boolean=false, alertMessage : String = '' ) :  EvernoteAPICommandTriggerEvent
+		{
+			var e : EvernoteAPICommandTriggerEvent = new EvernoteAPICommandTriggerEvent( EvernoteAPICommandTriggerEvent.CREATE_LINKED_NOTEBOOK_TRIGGER )
+			#{expand_args_assign_to(args, 'e')} //e.x = x; e.y=y;
+			e.optionalParameters( fxSuccess, fxFault, alert, alertMessage )
+			return e; 
+		}    
+		"	
+		#add properties to events
+	elsif step == 7
+    code = "
+		static public function #{fx_name.capfirstletter}(#{with_type(args)}, fxSuccess : Function, fxFault: Function, alert:Boolean=false, alertMessage : String = '' ) :  EvernoteAPICommandTriggerEvent
+		{
+			var e : EvernoteAPICommandTriggerEvent = new EvernoteAPICommandTriggerEvent( EvernoteAPICommandTriggerEvent.CREATE_LINKED_NOTEBOOK_TRIGGER )
+			#{expand_args_assign_to(args, 'e')} //e.x = x; e.y=y;
+			e.optionalParameters( fxSuccess, fxFault, alert, alertMessage )
+			return e; 
+		}    
+		"	
+		#create methods that create static_events and dispatch them
+	elsif step == 8
+    code = "
+		static public function #{fx_name.capfirstletter}(#{with_type(args)}, fxSuccess : Function, fxFault: Function, alert:Boolean=false, alertMessage : String = '' ) :  EvernoteAPICommandTriggerEvent
+		{
+			var e : EvernoteAPICommandTriggerEvent = new EvernoteAPICommandTriggerEvent( EvernoteAPICommandTriggerEvent.CREATE_LINKED_NOTEBOOK_TRIGGER )
+			#{expand_args_assign_to(args, 'e')} //e.x = x; e.y=y;
+			e.optionalParameters( fxSuccess, fxFault, alert, alertMessage )
+			return e; 
+		}    
+		"			
+	end
+	puts   code.rstrip
+  end
+
+
+#Utility Functions: 
 
    def underscore(camel_cased_word)
      camel_cased_word.to_s.gsub(/::/, '/').
@@ -209,13 +340,13 @@ def convert_events fx_name, args
     return str
   end
 
-  def without_type( params ) 
+  def without_type( params , append = '') 
     str = ''
     params.each do | param |
       if ( param[0] == 'authenticationToken')
         str += 'this.auth.authenticationToken'
       else
-        str += param[0].to_s
+        str += append+param[0].to_s
       end
       str += ', ' if param != params.last
     end

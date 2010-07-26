@@ -60,7 +60,6 @@ package org.syncon.evernote.test.cases
 			note.updated = note.created
 			//note.notebookGuid = "3"
 			//note.deleted = 0
-			
 			service.createNote( note ) 
 			
 		}
@@ -114,8 +113,8 @@ package org.syncon.evernote.test.cases
 			serviceDispatcher.addEventListener( EvernoteServiceEvent.FIND_NOTE_COUNTS, 
 				Async.asyncHandler(this, handleNotesCounted, 8000, null, 
 					null), false, 0, true);
+			this.printSequence()
 			service.findNoteCounts()
- 
 		}
 		
 		protected function handleNotesCounted( event:EvernoteServiceEvent, o:Object ):void
@@ -142,8 +141,8 @@ package org.syncon.evernote.test.cases
 			serviceDispatcher.addEventListener( EvernoteServiceEvent.FIND_NOTE_COUNTS, 
 				Async.asyncHandler(this, handleNotesCounted, 8000, null, 
 					null), false, 0, true);
+			this.printSequence()
 			service.findNoteCounts()
- 
 		}		
 		
 		
@@ -155,7 +154,7 @@ package org.syncon.evernote.test.cases
 			serviceDispatcher.addEventListener( EvernoteServiceEvent.DELETE_NOTE, 
 				Async.asyncHandler(this, handleDeleteNote, 4000, null, 
 					null), false, 0, true);
-			
+			this.printSequence()
 			service.deleteNote(    note.guid ) 
 		}
 		protected function handleDeleteNote( event:EvernoteServiceEvent, o:Object ):void
@@ -172,7 +171,7 @@ package org.syncon.evernote.test.cases
 			serviceDispatcher.addEventListener( EvernoteServiceEvent.GET_NOTE, 
 				Async.asyncHandler(this, handleGetNote, 4000, null, 
 					null), false, 0, true);
-			
+			this.printSequence()
 			service.getNote(    note.guid ) 
 		}
 		protected function handleGetNote( event:EvernoteServiceEvent, o:Object ):void
@@ -180,7 +179,10 @@ package org.syncon.evernote.test.cases
 			trace('Note Got');
 		}					
 				
-		
-		
+		private function printSequence() : void
+		{
+			(service.noteStore as Object).seqid_++;
+			trace ( 'calling service id ' + (service.noteStore as Object).seqid_ );
+		}
 	}
 }

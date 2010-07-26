@@ -41,6 +41,8 @@ package org.apache.thrift.protocol {
     protected var readLength_:int;
     protected var checkReadLength_:Boolean = false;
 
+	public var _seq : int = -1
+	
   /**
    * Factory
    */
@@ -65,7 +67,6 @@ package org.apache.thrift.protocol {
   */
   
     private var trans_:TTransport;
-    
     /**
      * Constructor
      */
@@ -191,24 +192,53 @@ package org.apache.thrift.protocol {
     /**
      * Reading methods.
      */
-  
-    public function readMessageBegin():TMessage {
+
+	public function readMessageBegin():TMessage {
       var size:int = readI32();
       if (size < 0) {
         var version:int = size & VERSION_MASK;
         if (version != VERSION_1) {
           throw new TProtocolError(TProtocolError.BAD_VERSION, "Bad version in readMessageBegin");
         }
-        return new TMessage(readString(), size & 0x000000ff, readI32());
+		//this._seq = readI32()
+        //return new TMessage(readString(), size & 0x000000ff, _seq);
+		var msg : TMessage = new TMessage(readString(), size & 0x000000ff, readI32());
+		this._seq = msg.seqid		
+		return msg
       }
       else {
         if (strictRead_) {
           throw new TProtocolError(TProtocolError.BAD_VERSION, "Missing version in readMessageBegin, old client?");
         }
-            return new TMessage(readStringBody(size), readByte(), readI32());
+			//make seq public to refer to it later modification on 7/26/10
+			//this._seq = readI32()
+            //return new TMessage(readStringBody(size), readByte(), _seq);
+		//must erad in order
+			msg  = new TMessage(readStringBody(size), readByte(), readI32());		
+			this._seq = msg.seqid
+			return msg	
           }
     }
-  
+	
+	/*
+	public function readMessageBegin():TMessage {
+		var size:int = readI32();
+		if (size < 0) {
+			var version:int = size & VERSION_MASK;
+			if (version != VERSION_1) {
+				throw new TProtocolError(TProtocolError.BAD_VERSION, "Bad version in readMessageBegin");
+			}
+			return new TMessage(readString(), size & 0x000000ff, readI32());
+		}
+		else {
+			if (strictRead_) {
+				throw new TProtocolError(TProtocolError.BAD_VERSION, "Missing version in readMessageBegin, old client?");
+			}
+			return new TMessage(readStringBody(size), readByte(), readI32());
+		}
+	}	
+	*/
+	
     public function readMessageEnd():void {}
   
     public function readStructBegin():TStruct {
@@ -313,6 +343,11 @@ package org.apache.thrift.protocol {
         bytes.position = 0;
       }
   
+	public function lastMessageSequenceNumber()  :  int
+	{
+		return _seq ; 
+	}
+	
     public function setReadLength(readLength:int):void {
       readLength_ = readLength;
       checkReadLength_ = true;

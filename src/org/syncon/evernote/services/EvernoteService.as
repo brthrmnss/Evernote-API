@@ -53,6 +53,33 @@ package org.syncon.evernote.services
 			//this.service = new FlickrService(FLICKR_API_KEY);
 		}
 		
+		/**
+		 * In attempt to replicate AsyncToken functionality, 
+		 * each message is given a sequence number. 
+		 * this will be dispatched with the recieving event
+		 * */
+		public function getSequenceNumber()  : int
+		{
+			var noteStoreUnCast : Object =  noteStore as Object 
+			var iprot_ : Object = noteStoreUnCast.iprot_
+			var lastMessageSequenceNumber : int  =	iprot_.lastMessageSequenceNumber()
+			trace( 'old sequence number ' + lastMessageSequenceNumber )
+			return lastMessageSequenceNumber;
+	}
+	
+		public function incrementSequence() : int
+		{
+			var noteStoreUnCast : Object =  noteStore as Object 
+			if ( noteStoreUnCast.seqid_ > 10000 )
+			{
+				noteStoreUnCast.seqid = 0
+			}
+			else
+				noteStoreUnCast.seqid_++;
+			trace ( 'calling service id ' + noteStoreUnCast.seqid_ );
+			return noteStoreUnCast.seqid_
+		}			
+		
 		public function newNote(title:String, contents:String):Note
 		{
 			var note : Note = new Note()
@@ -62,7 +89,7 @@ package org.syncon.evernote.services
 			return note
 		}
 		
-	public function  getAuth(  login : String, pwrd : String ) : void//; // AuthenticationResult
+		public function  getAuth(  login : String, pwrd : String ) : void//; // AuthenticationResult
 		{
 			
 			this.username  = login;
@@ -305,7 +332,7 @@ package org.syncon.evernote.services
 		
 		public function findNoteCounts(filter:NoteFilter=null, withTrash:Boolean=false):void {
 			if ( filter == null ) {filter = new NoteFilter }
-			trace( 'seq ' + ( noteStore as NoteStoreImpl).seqid_ )
+		//	trace( 'seq ' + ( noteStore as NoteStoreImpl).seqid_ )
 			noteStore.findNoteCounts(this.auth.authenticationToken, filter, withTrash, findNoteCountsFaultHandler, findNoteCountsResultHandler)
 		}
 		private function findNoteCountsResultHandler(result:Object=null):void {
@@ -320,8 +347,9 @@ package org.syncon.evernote.services
 			noteStore.getNote(this.auth.authenticationToken, guid, withContent, withResourcesData, withResourcesRecognition, withResourcesAlternateData, getNoteFaultHandler, getNoteResultHandler)
 		}
 		private function getNoteResultHandler(result:Object=null):void {
-			this.dispatch( new EvernoteServiceEvent( EvernoteServiceEvent.GET_NOTE, result)) 
-		}
+			this.dispatch( new EvernoteServiceEvent( EvernoteServiceEvent.GET_NOTE, result))
+		}	
+		
 		private function getNoteFaultHandler(result:Object=null):void {
 			this.dispatch( new EvernoteServiceEvent( EvernoteServiceEvent.GET_NOTE_FAULT, result)) 
 		}

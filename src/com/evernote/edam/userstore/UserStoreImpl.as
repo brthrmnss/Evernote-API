@@ -997,7 +997,8 @@ class authenticate_result implements TBase {
     return this.success != null;
   }
 
-  public function get userException() {
+  	//manually added return type EDAMUserException on 7/26/10
+  public function get userException() :EDAMUserException {
     return this._userException;
   }
 
