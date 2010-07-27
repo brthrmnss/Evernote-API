@@ -16,8 +16,16 @@ class Person
     puts "test"
   end
 
-
+  def unique_params
+    @params
+  end
+  def unique_params=(params)
+    @params=params
+  end  
+  
+  
 	def read_file  
+    @unique_params = []
     comment = false
     error_block = false
     args = []
@@ -72,7 +80,10 @@ class Person
         #puts args.join(', ')
 	#uncomment parsing functions
         #convert(name, format_thrift_arg_strings(args))
-	fxs.push( [name, format_thrift_arg_strings(args)] )
+        fxs.push( [name, format_thrift_arg_strings(args)] )
+        format_thrift_arg_strings(args).each do | arg | 
+          @unique_params.push(arg) if @unique_params.include?( arg ) == false
+        end
         #convert_events(name,  format_thrift_arg_strings(args))
         next #skip last line
       end      
@@ -85,12 +96,13 @@ class Person
 			end
 		end
 	i = 0	
-	5.times  do |i |
+	8.times  do |i |
 		fxs.each do | fx_pair |
 			create_command_skeleton fx_pair[0], fx_pair[1], i
 		end
 	end
-	
+	#create_event_variables()
+  
 	end
 #open file
 #find functions
@@ -196,7 +208,12 @@ def create_command_skeleton fx_name, args, step
 	event_name = underscore(fx_name)
 	#puts good
 	event_name = event_name.upcase
+  #puts "#{event_name} #{underscore(fx_name)} #{fx_name}"
 	#fx_name = ''
+  fx_name_static = fx_name.clone
+  fx_name_static[0..0] = fx_name_static[0..0].capitalize
+  #puts "#{fx_name_static} #{fx_name_static[0..0]} #{fx_name_static[0..0].capitalize} "
+  #asdf.g
 	fxFault = fx_name + 'FaultHandler'
 	fxOk= fx_name + 'ResultHandler'
 	#args = []
@@ -215,7 +232,9 @@ def create_command_skeleton fx_name, args, step
 	
 	command_class = "EvernoteAPICommand"
 	command_trigger_event_class = "EvernoteAPICommandTriggerEvent"
-	step += 1
+	
+  step += 1
+  return if step != 2
 	#command trigger events	
 	if step == 1
     code = "
@@ -228,26 +247,46 @@ def create_command_skeleton fx_name, args, step
 		commandMap.mapEvent(#{command_trigger_event_class}.#{command_trigger_var}, #{command_class}, #{command_trigger_event_class}, false );				
 		"
 		code.lstrip!		
-	#execute portion of command
+		#add properties to events
 	elsif step == 3
+    code = "
+		static public function #{fx_name_static}(#{with_type(args, true)}, fxSuccess:Function=null, fxFault:Function=null, alert:Boolean=false, alertMessage : String = '' ) : #{command_trigger_event_class}
+		{
+			var e : #{command_trigger_event_class} = new #{command_trigger_event_class}( #{command_trigger_event_class}.#{command_trigger_var} )
+			#{expand_args_assign_to(args, 'e')}; 
+			e.optionalParameters( fxSuccess, fxFault, alert, alertMessage );
+			return e; 
+		}    
+		"	
+		#create methods that create static_events and dispatch them
+	elsif step == 4
+    code = "
+		static public function #{fx_name_static }(#{with_type(args, true)}, fxSuccess:Function=null, fxFault:Function=null, alert:Boolean=false, alertMessage : String = '' ) : #{command_trigger_event_class}
+		{
+			var e : #{command_trigger_event_class} = #{command_trigger_event_class}.#{fx_name_static}( #{without_type(args, true)} );
+			e.optionalParameters( fxSuccess, fxFault, alert, alertMessage );
+			this.dispatch(e)
+		}    
+		"			    
+	#execute portion of command
+	elsif step == 5
     code = "		if ( event.type == #{command_trigger_event_class}.#{command_trigger_var} ) 
 		{
-			this.service.#{fx_name}( #{without_type(args, 'event.')} )
+			this.service.#{fx_name}( #{without_type(args, true, 'event.')} )
 			this.service.eventDispatcher.addEventListener( #{service_event_type}.#{success_event_type}, this.#{fxOk} )
 			this.service.eventDispatcher.addEventListener( #{service_event_type}.#{fault_event_type}, this.#{fxFault} )
 		}	
 		"	
 	#command event handlers
-	elsif step == 4
-    code = "		private function #{fxOk}(e:EvernoteServiceEvent)  : void
+	elsif step == 6
+    code = "		private function #{fxOk}(e:#{service_event_type})  : void
 		{
 			if ( seqId != this.service.getSequenceNumber()) return; 
 			if ( this.event.fxSuccess != null ) this.event.fxSuccess(e.data);
-			//this.model.x = e.data
+			// 
 			this.deReference()			
 		}		
-		
-		private function #{fxFault}(e:EvernoteServiceEvent)  : void
+		private function #{fxFault}(e:#{service_event_type})  : void
 		{
 			if ( seqId != this.service.getSequenceNumber()) return; 			
 			if ( this.event.fxFault != null ) this.event.fxFault(e.data);
@@ -255,51 +294,35 @@ def create_command_skeleton fx_name, args, step
 		}
 		"			
 		#dereference event listeners
-	elsif step == 5
+	elsif step == 7
     code = "		if ( event.type == #{command_trigger_event_class}.#{command_trigger_var} ) 
 		{
 			this.service.eventDispatcher.removeEventListener( #{service_event_type}.#{success_event_type}, this.#{fxOk} )
 			this.service.eventDispatcher.removeEventListener( #{service_event_type}.#{fault_event_type}, this.#{fxFault} )
 		}	
 		"
-		#create static event properties onTrigger Event to dispatch events
-	elsif step == 6
-    code = "
-		static public function #{fx_name.capfirstletter}(#{with_type(args)}, fxSuccess : Function, fxFault: Function, alert:Boolean=false, alertMessage : String = '' ) :  EvernoteAPICommandTriggerEvent
-		{
-			var e : EvernoteAPICommandTriggerEvent = new EvernoteAPICommandTriggerEvent( EvernoteAPICommandTriggerEvent.CREATE_LINKED_NOTEBOOK_TRIGGER )
-			#{expand_args_assign_to(args, 'e')} //e.x = x; e.y=y;
-			e.optionalParameters( fxSuccess, fxFault, alert, alertMessage )
-			return e; 
-		}    
-		"	
-		#add properties to events
-	elsif step == 7
-    code = "
-		static public function #{fx_name.capfirstletter}(#{with_type(args)}, fxSuccess : Function, fxFault: Function, alert:Boolean=false, alertMessage : String = '' ) :  EvernoteAPICommandTriggerEvent
-		{
-			var e : EvernoteAPICommandTriggerEvent = new EvernoteAPICommandTriggerEvent( EvernoteAPICommandTriggerEvent.CREATE_LINKED_NOTEBOOK_TRIGGER )
-			#{expand_args_assign_to(args, 'e')} //e.x = x; e.y=y;
-			e.optionalParameters( fxSuccess, fxFault, alert, alertMessage )
-			return e; 
-		}    
-		"	
-		#create methods that create static_events and dispatch them
-	elsif step == 8
-    code = "
-		static public function #{fx_name.capfirstletter}(#{with_type(args)}, fxSuccess : Function, fxFault: Function, alert:Boolean=false, alertMessage : String = '' ) :  EvernoteAPICommandTriggerEvent
-		{
-			var e : EvernoteAPICommandTriggerEvent = new EvernoteAPICommandTriggerEvent( EvernoteAPICommandTriggerEvent.CREATE_LINKED_NOTEBOOK_TRIGGER )
-			#{expand_args_assign_to(args, 'e')} //e.x = x; e.y=y;
-			e.optionalParameters( fxSuccess, fxFault, alert, alertMessage )
-			return e; 
-		}    
-		"			
+		#~ #create static event properties onTrigger Event to dispatch events
+	#~ elsif step == 8
+    #~ code = "
+		#~ static public function #{fx_name.capfirstletter}(#{with_type(args)}, fxSuccess : Function, fxFault: Function, alert:Boolean=false, alertMessage : String = '' ) :  EvernoteAPICommandTriggerEvent
+		#~ {
+			#~ var e : EvernoteAPICommandTriggerEvent = new EvernoteAPICommandTriggerEvent( EvernoteAPICommandTriggerEvent.CREATE_LINKED_NOTEBOOK_TRIGGER )
+			#~ #{expand_args_assign_to(args, 'e')} //e.x = x; e.y=y;
+			#~ e.optionalParameters( fxSuccess, fxFault, alert, alertMessage )
+			#~ return e; 
+		#~ }    
+		#~ "	
 	end
-	puts   code.rstrip
+    return if code == nil
+    puts   code.rstrip
   end
 
-
+def create_event_variables()
+  @unique_params.each do | param |
+    puts "public var #{param[0]} : #{param[1]};"
+  #"#{with_type(args, true)}"
+  end
+end
 #Utility Functions: 
 
    def underscore(camel_cased_word)
@@ -310,10 +333,11 @@ def create_command_skeleton fx_name, args, step
        downcase
    end
 
-  def with_type( params ) 
+  def with_type( params, drop_auth_token_parameter = true) 
     str = ''
+    
     params = params.clone
-      if ( params[0][0] == 'authenticationToken')
+      if ( drop_auth_token_parameter && params[0][0] == 'authenticationToken')
         params.delete_at 0
       end    
     
@@ -340,18 +364,36 @@ def create_command_skeleton fx_name, args, step
     return str
   end
 
-  def without_type( params , append = '') 
+  def without_type( params , drop_auth_token = false, append = '') 
+    parameters = []
     str = ''
     params.each do | param |
+      next if ( param[0] == 'authenticationToken' && drop_auth_token )
       if ( param[0] == 'authenticationToken')
-        str += 'this.auth.authenticationToken'
+        parameters .push('this.auth.authenticationToken' )
       else
-        str += append+param[0].to_s
+        parameters .push( append+param[0].to_s )
       end
-      str += ', ' if param != params.last
     end
-    return str
+    return parameters.join(', ')
   end
+
+  #take string of arguments and converts
+  # [x, y], 'e' => e.x = x; e.y = y
+  def expand_args_assign_to( params , assign_to , flat=true ) 
+    statements = []
+    str = ''
+    params.each do | param |
+      next if ( param[0] == 'authenticationToken')
+      statements.push( "#{assign_to}.#{param[0]}=#{param[0]}" )
+    end
+    str = statements.join('; ') if flat
+    str = statements.join('; \r') if ! flat
+    return str #+';'
+  end
+
+
+
 
 	def output
 		puts @output

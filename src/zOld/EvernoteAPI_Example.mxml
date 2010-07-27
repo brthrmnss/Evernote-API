@@ -11,7 +11,6 @@
 			
 			import com.adobe.net.URI;
 			import com.adobe.serialization.json.JSON;
-			import com.coderanger.EvernoteAPI;
 			import com.coderanger.OAuthEvent;
 			import com.coderanger.OAuthManager;
 			import com.coderanger.Parameter;
@@ -48,7 +47,7 @@
 			   
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
-		<evernote:EvernoteContext />
+	<!--	<evernote:EvernoteContext />-->
 	</fx:Declarations>
 	
  
