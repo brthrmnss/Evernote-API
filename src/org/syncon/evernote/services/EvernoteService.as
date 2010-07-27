@@ -120,7 +120,7 @@ package org.syncon.evernote.services
 		
 		public function handleCheckVersionFault(e:Object=null):void
 		{
-			
+			this.handleAuthenticateFault( e )
 		}				
 		
 		public function handleAuthenticateResult(e: AuthenticationResult=null):void
@@ -136,6 +136,7 @@ package org.syncon.evernote.services
 		
 		public function handleAuthenticateFault(e:Object=null):void
 		{
+			this.dispatch( new EvernoteServiceEvent( EvernoteServiceEvent.AUTH_GET_FAULT, e ) ) 
 		}
 		
 		
@@ -319,7 +320,8 @@ package org.syncon.evernote.services
 		}
 		
 		
-		public function findNotes(filter:NoteFilter, offset:int=0, maxNotes:int=0):void {
+		public function findNotes(filter:NoteFilter, offset:int=0, maxNotes:int=10000):void {
+			if ( filter == null ) filter = new NoteFilter;
 			noteStore.findNotes(this.auth.authenticationToken, filter, offset, maxNotes, findNotesFaultHandler, findNotesResultHandler)
 		}
 		private function findNotesResultHandler(result:Object=null):void {

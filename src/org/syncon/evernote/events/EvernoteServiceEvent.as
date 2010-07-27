@@ -19,7 +19,8 @@ package  org.syncon.evernote.events
 		 * smallest noun that is meaningful
 		 * */
 		public static const AUTH_GET:String = "authGet";
- 
+		public static const AUTH_GET_FAULT:String = "authGetFault";
+		
 		public static const GET_SYNC_CHUNK:String = "getSyncChunkResult";		
 		public static const GET_SYNC_CHUNK_FAULT:String = "getSyncChunkFault";
 		
