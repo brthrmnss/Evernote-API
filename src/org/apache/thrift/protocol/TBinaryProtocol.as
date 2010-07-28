@@ -309,7 +309,21 @@ package org.apache.thrift.protocol {
         ((long)(i64rd[7] & 0xff));
     }
     */
-  
+	/*
+	private var i64rd : ByteArray= new  ByteArray
+	public function readI64() throws TException {
+		readAll(i64rd, 0, 8);
+		return
+		((long)(i64rd[0] & 0xff) << 56) |
+			((long)(i64rd[1] & 0xff) << 48) |
+			((long)(i64rd[2] & 0xff) << 40) |
+			((long)(i64rd[3] & 0xff) << 32) |
+			((long)(i64rd[4] & 0xff) << 24) |
+			((long)(i64rd[5] & 0xff) << 16) |
+			((long)(i64rd[6] & 0xff) <<  8) |
+			((long)(i64rd[7] & 0xff));
+	}
+	*/
     public function readDouble():Number {
       readAll(8);
       return bytes.readDouble();
