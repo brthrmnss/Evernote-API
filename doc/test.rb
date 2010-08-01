@@ -32,40 +32,56 @@ class Person
     function = false 
     fxs = []
     name = ''
+    line_count = 0; 
+    debug_line_classification = false
     lines = File.open("thrift/NoteStore.thrift")
 		lines.each do | line | 
+      line_count += 1
 			next if line == nil || line == true || line.strip.empty?
+      next if line_count < 512 &&  debug_line_classification   
       comment = true if line.include? '/*'
-
       if line.include?('*/') && comment
-        comment = false         
+        comment = false     
+        puts "ce: " + line  if debug_line_classification     
         next #skip comment line
       end
+      puts "c: " + line if comment && debug_line_classification   
       next if comment
-      
+      #asdf.g if line.include?('Returns a list of all of the notebooks in the account.');
       error_block = true if line.include? 'throws'
 
       if line.include?(')') && error_block
         error_block = false         
+        puts "ee: " + line  if debug_line_classification        
         next #skip last line
       end      
+      puts "e: " + line if error_block && debug_line_classification         
       next if error_block
-      
+       #gggg.g if line.include?('list<Types.Notebook> listNotebooks(1: string authenticationToken)');    
+      function_first_line = false
       if line.include? '('
         #puts line
         function = true 
         split = line.split " "
-
+        puts "f: " + line  if debug_line_classification   
         type = split[0]; name = split[1].gsub('(1:', '' ) ;      
         #puts split.join(' ' )     
         #puts name        
         args = [] 
-        args.push( line.split(": ")[1].gsub(',', '' )  )
-        next
+        temp_line = line.clone
+        # if has 1 argument, ')' for closing parameter list should be stripped
+        temp_line.gsub!(')', '' ) if line.include?(')')    
+        #temp_line.gsub!('\\n', '' ) if line.include?('\n')      
+        argument_pair = temp_line.split(": ")[1].gsub(',', '' )
+        #puts argument_pair.inspect
+        #asdf.g
+        args.push(  argument_pair )
+        function_first_line = true
+        #next #allow continued processing to catch service calls with 1 argument
       end
     
-      
-      if function 
+       #gggg.g if line.include?('list<Types.Notebook> listNotebooks(1: string authenticationToken)');      
+      if function && function_first_line == false
         split = line.strip.split(': ')
         #puts line.inspect
         #puts split.join(', ')
@@ -74,27 +90,31 @@ class Person
       #next if function         
     
       if line.include?(')') && function
-        function = false     
+        function = false  
+        puts "fe: " + line  if debug_line_classification   
         #puts 'function:'
         #puts name
         #puts args.join(', ')
-	#uncomment parsing functions
+        #uncomment parsing functions
         #convert(name, format_thrift_arg_strings(args))
+        #puts name + ' ' + args.inspect
         fxs.push( [name, format_thrift_arg_strings(args)] )
         format_thrift_arg_strings(args).each do | arg | 
           @unique_params.push(arg) if @unique_params.include?( arg ) == false
         end
-        #convert_events(name,  format_thrift_arg_strings(args))
+        #convert_static_constants_for_events(name,  format_thrift_arg_strings(args))
         next #skip last line
       end      
  
-      
+      puts "fi: " + line if debug_line_classification   
 
       
 			if line.include?('')
 				#puts line
 			end
 		end
+  
+  #return;
 	i = 0	
 	8.times  do |i |
 		fxs.each do | fx_pair |
@@ -170,7 +190,6 @@ def convert fx_name, args
 		}
 			private function #{fxOk}(result:Object=null):void {
 				this.dispatch( new #{event_type}( #{event_type}.#{success_event_type}, result, this.getSequenceNumber() )) 
-				
 			}
 			private function #{fxFault}(result:Object=null):void {
 				this.dispatch( new #{event_type}( #{event_type}.#{fault_event_type}, result, this.getSequenceNumber() )) 
@@ -234,7 +253,7 @@ def create_command_skeleton fx_name, args, step
 	command_trigger_event_class = "EvernoteAPICommandTriggerEvent"
 	
   step += 1
-  return if step != 2
+  return if step != 6
 	#command trigger events	
 	if step == 1
     code = "
@@ -250,7 +269,7 @@ def create_command_skeleton fx_name, args, step
 		#add properties to events
 	elsif step == 3
     code = "
-		static public function #{fx_name_static}(#{with_type(args, true)}, fxSuccess:Function=null, fxFault:Function=null, alert:Boolean=false, alertMessage : String = '' ) : #{command_trigger_event_class}
+		static public function #{fx_name_static}(#{with_type(args, true, true)} fxSuccess:Function=null, fxFault:Function=null, alert:Boolean=false, alertMessage : String = '' ) : #{command_trigger_event_class}
 		{
 			var e : #{command_trigger_event_class} = new #{command_trigger_event_class}( #{command_trigger_event_class}.#{command_trigger_var} )
 			#{expand_args_assign_to(args, 'e')}; 
@@ -261,7 +280,7 @@ def create_command_skeleton fx_name, args, step
 		#create methods that create static_events and dispatch them
 	elsif step == 4
     code = "
-		static public function #{fx_name_static }(#{with_type(args, true)}, fxSuccess:Function=null, fxFault:Function=null, alert:Boolean=false, alertMessage : String = '' ) : #{command_trigger_event_class}
+		static public function #{fx_name_static }(#{with_type(args, true, true)}, fxSuccess:Function=null, fxFault:Function=null, alert:Boolean=false, alertMessage : String = '' ) : #{command_trigger_event_class}
 		{
 			var e : #{command_trigger_event_class} = #{command_trigger_event_class}.#{fx_name_static}( #{without_type(args, true)} );
 			e.optionalParameters( fxSuccess, fxFault, alert, alertMessage );
@@ -283,7 +302,7 @@ def create_command_skeleton fx_name, args, step
 		{
 			if ( seqId != this.service.getSequenceNumber()) return; 
 			if ( this.event.fxSuccess != null ) this.event.fxSuccess(e.data);
-			// 
+    
 			this.deReference()			
 		}		
 		private function #{fxFault}(e:#{service_event_type})  : void
@@ -333,7 +352,7 @@ end
        downcase
    end
 
-  def with_type( params, drop_auth_token_parameter = true) 
+  def with_type( params, drop_auth_token_parameter = true, add_comma_at_end_if_not_empty = false) 
     str = ''
     
     params = params.clone
@@ -361,6 +380,7 @@ end
       str += ', ' if param != params.last
     end
     #str = params2.join(', ')
+    str += ',' if add_comma_at_end_if_not_empty && str != ''
     return str
   end
 

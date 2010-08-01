@@ -21,11 +21,20 @@ package  org.syncon.evernote.events
 		public static const AUTH_GET:String = "authGet";
 		public static const AUTH_GET_FAULT:String = "authGetFault";
 		
+		public static const GET_SYNC_STATE:String = "getSyncStateResult";		
+		public static const GET_SYNC_STATE_FAULT:String = "getSyncStateFault";
+		
 		public static const GET_SYNC_CHUNK:String = "getSyncChunkResult";		
 		public static const GET_SYNC_CHUNK_FAULT:String = "getSyncChunkFault";
 		
+		public static const LIST_NOTEBOOKS:String = "listNotebooksResult";		
+		public static const LIST_NOTEBOOKS_FAULT:String = "listNotebooksFault";
+		
 		public static const GET_NOTEBOOK:String = "getNotebookResult";		
 		public static const GET_NOTEBOOK_FAULT:String = "getNotebookFault";
+		
+		public static const GET_DEFAULT_NOTEBOOK:String = "getDefaultNotebookResult";		
+		public static const GET_DEFAULT_NOTEBOOK_FAULT:String = "getDefaultNotebookFault";
 		
 		public static const CREATE_NOTEBOOK:String = "createNotebookResult";		
 		public static const CREATE_NOTEBOOK_FAULT:String = "createNotebookFault";
@@ -35,6 +44,9 @@ package  org.syncon.evernote.events
 		
 		public static const EXPUNGE_NOTEBOOK:String = "expungeNotebookResult";		
 		public static const EXPUNGE_NOTEBOOK_FAULT:String = "expungeNotebookFault";
+		
+		public static const LIST_TAGS:String = "listTagsResult";		
+		public static const LIST_TAGS_FAULT:String = "listTagsFault";
 		
 		public static const LIST_TAGS_BY_NOTEBOOK:String = "listTagsByNotebookResult";		
 		public static const LIST_TAGS_BY_NOTEBOOK_FAULT:String = "listTagsByNotebookFault";
@@ -53,6 +65,9 @@ package  org.syncon.evernote.events
 		
 		public static const EXPUNGE_TAG:String = "expungeTagResult";		
 		public static const EXPUNGE_TAG_FAULT:String = "expungeTagFault";
+		
+		public static const LIST_SEARCHES:String = "listSearchesResult";		
+		public static const LIST_SEARCHES_FAULT:String = "listSearchesFault";
 		
 		public static const GET_SEARCH:String = "getSearchResult";		
 		public static const GET_SEARCH_FAULT:String = "getSearchFault";
@@ -99,6 +114,9 @@ package  org.syncon.evernote.events
 		public static const EXPUNGE_NOTES:String = "expungeNotesResult";		
 		public static const EXPUNGE_NOTES_FAULT:String = "expungeNotesFault";
 		
+		public static const EXPUNGE_INACTIVE_NOTES:String = "expungeInactiveNotesResult";		
+		public static const EXPUNGE_INACTIVE_NOTES_FAULT:String = "expungeInactiveNotesFault";
+		
 		public static const COPY_NOTE:String = "copyNoteResult";		
 		public static const COPY_NOTE_FAULT:String = "copyNoteFault";
 		
@@ -129,6 +147,9 @@ package  org.syncon.evernote.events
 		public static const GET_RESOURCE_ATTRIBUTES:String = "getResourceAttributesResult";		
 		public static const GET_RESOURCE_ATTRIBUTES_FAULT:String = "getResourceAttributesFault";
 		
+		public static const GET_ACCOUNT_SIZE:String = "getAccountSizeResult";		
+		public static const GET_ACCOUNT_SIZE_FAULT:String = "getAccountSizeFault";
+		
 		public static const GET_ADS:String = "getAdsResult";		
 		public static const GET_ADS_FAULT:String = "getAdsFault";
 		
@@ -141,26 +162,35 @@ package  org.syncon.evernote.events
 		public static const CREATE_SHARED_NOTEBOOK:String = "createSharedNotebookResult";		
 		public static const CREATE_SHARED_NOTEBOOK_FAULT:String = "createSharedNotebookFault";
 		
+		public static const LIST_SHARED_NOTEBOOKS:String = "listSharedNotebooksResult";		
+		public static const LIST_SHARED_NOTEBOOKS_FAULT:String = "listSharedNotebooksFault";
+		
 		public static const EXPUNGE_SHARED_NOTEBOOKS:String = "expungeSharedNotebooksResult";		
 		public static const EXPUNGE_SHARED_NOTEBOOKS_FAULT:String = "expungeSharedNotebooksFault";
 		
 		public static const CREATE_LINKED_NOTEBOOK:String = "createLinkedNotebookResult";		
 		public static const CREATE_LINKED_NOTEBOOK_FAULT:String = "createLinkedNotebookFault";
 		
-		public static const UPDATE_LINKED_NOTEBOOK:String = "updateLinkedNoftebookResult";		
+		public static const UPDATE_LINKED_NOTEBOOK:String = "updateLinkedNotebookResult";		
 		public static const UPDATE_LINKED_NOTEBOOK_FAULT:String = "updateLinkedNotebookFault";
+		
+		public static const LIST_LINKED_NOTEBOOKS:String = "listLinkedNotebooksResult";		
+		public static const LIST_LINKED_NOTEBOOKS_FAULT:String = "listLinkedNotebooksFault";
 		
 		public static const EXPUNGE_LINKED_NOTEBOOK:String = "expungeLinkedNotebookResult";		
 		public static const EXPUNGE_LINKED_NOTEBOOK_FAULT:String = "expungeLinkedNotebookFault";
 		
-		public static const STRING:String = "stringResult";		
-		public static const STRING_FAULT:String = "stringFault";
+		public static const AUTHENTICATE_TO_SHARED_NOTEBOOK:String = "authenticateToSharedNotebookResult";		
+		public static const AUTHENTICATE_TO_SHARED_NOTEBOOK_FAULT:String = "authenticateToSharedNotebookFault";
+		
+		public static const GET_SHARED_NOTEBOOK_BY_AUTH:String = "getSharedNotebookByAuthResult";		
+		public static const GET_SHARED_NOTEBOOK_BY_AUTH_FAULT:String = "getSharedNotebookByAuthFault";
 		
 		public static const EMAIL_NOTE:String = "emailNoteResult";		
 		public static const EMAIL_NOTE_FAULT:String = "emailNoteFault";
 		
 		private var _data:Object = new Object();;
-		public function EvernoteServiceEvent(type:String, data_:Object = null)
+		public function EvernoteServiceEvent(type:String, data_:Object = null, seq : Number=0)
 		{
 			this._data = data_;
 	/*		for each ( var placement : Object in this.things ) 

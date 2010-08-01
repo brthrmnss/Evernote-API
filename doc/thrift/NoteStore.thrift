@@ -2115,8 +2115,7 @@ service NoteStore {
    *   </li>
    * </ul>
    */
-  UserStore.AuthenticationResult
-    authenticateToSharedNotebook(1: string shareKey,
+  UserStore.AuthenticationResult authenticateToSharedNotebook(1: string shareKey,
                                  2: string authenticationToken)
     throws (1: Errors.EDAMUserException userException,
             2: Errors.EDAMNotFoundException notFoundException,
