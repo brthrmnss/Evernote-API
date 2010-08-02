@@ -9,9 +9,9 @@ package  org.syncon.evernote.events
 	import com.evernote.edam.userstore.AuthenticationResult;
 	*/
 	import flash.events.Event;
-	import flash.utils.getDefinitionByName;
+	/*import flash.utils.getDefinitionByName;
 	import flash.utils.getQualifiedClassName;
-	
+	*/
 	public class EvernoteServiceEvent extends Event
 	{
 		/**
