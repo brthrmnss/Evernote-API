@@ -5,6 +5,7 @@
  */
 package com.evernote.edam.type {
 
+import flash.events.EventDispatcher;
 import flash.utils.ByteArray;
 import flash.utils.Dictionary;
 
@@ -142,7 +143,7 @@ import org.apache.thrift.protocol.*;
    *   </dd>
    * </dl>
    */
-  public class Note implements TBase   {
+  public class Note  implements TBase   {
     private static const STRUCT_DESC:TStruct = new TStruct("Note");
     private static const GUID_FIELD_DESC:TField = new TField("guid", TType.STRING, 1);
     private static const TITLE_FIELD_DESC:TField = new TField("title", TType.STRING, 2);
@@ -160,7 +161,7 @@ import org.apache.thrift.protocol.*;
     private static const ATTRIBUTES_FIELD_DESC:TField = new TField("attributes", TType.STRUCT, 14);
     private static const TAG_NAMES_FIELD_DESC:TField = new TField("tagNames", TType.LIST, 15);
 
-    private var _guid:String;
+	private var _guid:String;
     public static const GUID:int = 1;
     private var _title:String;
     public static const TITLE:int = 2;
@@ -1111,6 +1112,10 @@ import org.apache.thrift.protocol.*;
       // check for required fields
       // check that fields of type enum have valid values
     }
+	
+	
+	public var e : EventDispatcher = new EventDispatcher();
+	
 
   }
 
