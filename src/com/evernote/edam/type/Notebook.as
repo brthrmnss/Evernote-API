@@ -448,7 +448,7 @@ import org.apache.thrift.protocol.*;
             }
             break;
           case SERVICECREATED:
-            if (field.type == TType.DOUBLE) {
+            if (field.type == TType.I64 || field.type == TType.DOUBLE) {
               this.serviceCreated = iprot.readDouble();
               this.__isset_serviceCreated = true;
             } else { 
@@ -456,7 +456,7 @@ import org.apache.thrift.protocol.*;
             }
             break;
           case SERVICEUPDATED:
-            if (field.type == TType.DOUBLE) {
+            if (field.type == TType.I64 || field.type == TType.DOUBLE) {
               this.serviceUpdated = iprot.readDouble();
               this.__isset_serviceUpdated = true;
             } else { 
