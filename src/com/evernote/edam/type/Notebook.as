@@ -4,10 +4,10 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  */
 package com.evernote.edam.type {
-import org.apache.thrift.Set;
 import flash.utils.Dictionary;
 
 import org.apache.thrift.*;
+import org.apache.thrift.Set;
 import org.apache.thrift.meta_data.*;
 import org.apache.thrift.protocol.*;
 
@@ -450,6 +450,7 @@ import org.apache.thrift.protocol.*;
           case SERVICECREATED:
             if (field.type == TType.I64 || field.type == TType.DOUBLE) {
               this.serviceCreated = iprot.readDouble();
+			  trace(  this.serviceCreated   )
               this.__isset_serviceCreated = true;
             } else { 
               TProtocolUtil.skip(iprot, field.type);
@@ -457,8 +458,13 @@ import org.apache.thrift.protocol.*;
             break;
           case SERVICEUPDATED:
             if (field.type == TType.I64 || field.type == TType.DOUBLE) {
-              this.serviceUpdated = iprot.readDouble();
+              /*
+			  this.serviceUpdated = iprot.readDouble();
+			  trace(  this.serviceUpdated   )
               this.__isset_serviceUpdated = true;
+			  */
+				var o : Object = iprot.readI64()
+					trace(o)
             } else { 
               TProtocolUtil.skip(iprot, field.type);
             }

@@ -19,10 +19,10 @@
 
 package org.apache.thrift.protocol {
 
+  import flash.utils.ByteArray;
+  
   import org.apache.thrift.TError;
   import org.apache.thrift.transport.TTransport;
-
-  import flash.utils.ByteArray;
   
   /**
    * Protocol interface definition
@@ -113,7 +113,7 @@ package org.apache.thrift.protocol {
     
     function readI32():int;
     
-    //function readI64():Number;
+    function readI64():Object;
     
     function readDouble():Number;
     
