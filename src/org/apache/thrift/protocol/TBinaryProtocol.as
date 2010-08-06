@@ -326,11 +326,18 @@ package org.apache.thrift.protocol {
 			data[i] =  bytes.readUnsignedByte()				
 		}
 		*/
-		for ( var i : int = 0; i < 2 ; i++ )
+	/*	for ( var i : int = 0; i < 2 ; i++ )
 		{
 			readAll(4);
 			data[i] =  bytes.readUnsignedInt();	
-		}		
+		}		*/
+		readAll(4);	
+		data[0] = this.bytes.readInt()
+		readAll(4);
+		data[1] = this.bytes.readUnsignedInt()	
+			
+		//most 64 bit numbers are for time implementations , if number will fit as a Number, 
+			//return number, else return binary bits as a string
 		
 		return data
 		 

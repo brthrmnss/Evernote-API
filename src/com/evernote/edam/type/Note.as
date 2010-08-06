@@ -5,7 +5,6 @@
  */
 package com.evernote.edam.type {
 
-import flash.events.EventDispatcher;
 import flash.utils.ByteArray;
 import flash.utils.Dictionary;
 
@@ -13,6 +12,7 @@ import org.apache.thrift.*;
 import org.apache.thrift.Set;
 import org.apache.thrift.meta_data.*;
 import org.apache.thrift.protocol.*;
+import org.syncon.evernote.utils.Convert64BitNumberToNumber;
 
   /**
    * Represents a single note in the user's account.
@@ -328,20 +328,12 @@ import org.apache.thrift.protocol.*;
       return this.__isset_contentLength;
     }
 
-	public var createdAt : Date;
-	public var updatedAt : Date;
-	
     public function get created():Number {
       return this._created;
     }
 
-    public function set created(created:Number):void {
-	var date : Date = new Date()
-		date
-		date.setTime(   created )
-		trace( 'created Note ' + created ) 
-		//var dbg : Array = [ date.date, date.month, date.fullYear];
-		this.createdAt = date; 
+    public function set created(created:Number):void 
+	{
       this._created = created;
       this.__isset_created = true;
     }
@@ -360,13 +352,8 @@ import org.apache.thrift.protocol.*;
     }
 
     public function set updated(updated:Number):void {
-		var date : Date = new Date()
-		date.setTime( date.getTime() + updated ) 
-		this.updatedAt = date; 
-		
 		this._updated = updated;
-	  
-      this.__isset_updated = true;
+     	 this.__isset_updated = true;
     }
 
     public function unsetUpdated():void {
@@ -768,16 +755,24 @@ import org.apache.thrift.protocol.*;
             break;
           case CREATED:
             if (field.type == TType.I64 || field.type == TType.DOUBLE ) {
-              this.created = iprot.readDouble();
-              this.__isset_created = true;
+              /*this.created = iprot.readDouble();
+              this.__isset_created = true;*/
+			  var numberBits : Object = iprot.readI64()
+			  var convertor :   Convert64BitNumberToNumber = new Convert64BitNumberToNumber()
+			  this.created = convertor.input2Ints( numberBits ) 
+			  this.__isset_created = true;			  
             } else { 
               TProtocolUtil.skip(iprot, field.type);
             }
             break;
           case UPDATED:
 			  if (field.type == TType.I64 || field.type == TType.DOUBLE ) {
-              this.updated = iprot.readDouble();
-              this.__isset_updated = true;
+              /*this.updated = iprot.readDouble();
+              this.__isset_updated = true;*/
+			  var numberBits : Object = iprot.readI64()
+			   convertor = new Convert64BitNumberToNumber()
+			  this.updated = convertor.input2Ints( numberBits ) 	
+			  this.__isset_updated = true;
             } else { 
               TProtocolUtil.skip(iprot, field.type);
             }
@@ -1112,9 +1107,6 @@ import org.apache.thrift.protocol.*;
       // check for required fields
       // check that fields of type enum have valid values
     }
-	
-	
-	public var e : EventDispatcher = new EventDispatcher();
 	
 
   }

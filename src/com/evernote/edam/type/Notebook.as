@@ -10,6 +10,7 @@ import org.apache.thrift.*;
 import org.apache.thrift.Set;
 import org.apache.thrift.meta_data.*;
 import org.apache.thrift.protocol.*;
+import org.syncon.evernote.utils.Convert64BitNumberToNumber;
 
   /**
    * A unique container for a set of notes.
@@ -464,7 +465,10 @@ import org.apache.thrift.protocol.*;
               this.__isset_serviceUpdated = true;
 			  */
 				var o : Object = iprot.readI64()
-					trace(o)
+				var ee :  Convert64BitNumberToNumber = new Convert64BitNumberToNumber
+				this.serviceUpdated = ee.input2Ints( o ) 
+				this.__isset_serviceUpdated = true;
+				//	trace(o)
             } else { 
               TProtocolUtil.skip(iprot, field.type);
             }
