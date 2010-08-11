@@ -13,6 +13,7 @@ import org.apache.thrift.*;
 import org.apache.thrift.Set;
 import org.apache.thrift.meta_data.*;
 import org.apache.thrift.protocol.*;
+import org.syncon.evernote.utils.Convert64BitNumberToNumber;
 
   /**
    *  When an authentication (or re-authentication) is performed, this structure
@@ -272,8 +273,10 @@ import org.apache.thrift.protocol.*;
         switch (field.id)
         {
           case CURRENTTIME:
-            if (field.type == TType.I64) {
-              this.currentTime = iprot.readDouble();
+			 if (field.type == TType.I64 || field.type == TType.DOUBLE ) {
+			  var numberBits : Object = iprot.readI64()
+			  var convertor :   Convert64BitNumberToNumber = new Convert64BitNumberToNumber()
+			  this.currentTime = convertor.input2Ints( numberBits ) 
               this.__isset_currentTime = true;
             } else { 
               TProtocolUtil.skip(iprot, field.type);
@@ -287,8 +290,10 @@ import org.apache.thrift.protocol.*;
             }
             break;
           case EXPIRATION:
-            if (field.type == TType.I64) {
-              this.expiration = iprot.readDouble();
+			if (field.type == TType.I64 || field.type == TType.DOUBLE ) {
+			  numberBits = iprot.readI64()
+			  convertor = new Convert64BitNumberToNumber()
+			  this.expiration = convertor.input2Ints( numberBits ) 
               this.__isset_expiration = true;
             } else { 
               TProtocolUtil.skip(iprot, field.type);

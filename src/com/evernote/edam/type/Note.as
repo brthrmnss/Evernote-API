@@ -769,8 +769,8 @@ import org.syncon.evernote.utils.Convert64BitNumberToNumber;
 			  if (field.type == TType.I64 || field.type == TType.DOUBLE ) {
               /*this.updated = iprot.readDouble();
               this.__isset_updated = true;*/
-			  var numberBits : Object = iprot.readI64()
-			   convertor = new Convert64BitNumberToNumber()
+			  numberBits  = iprot.readI64()
+			  convertor = new Convert64BitNumberToNumber()
 			  this.updated = convertor.input2Ints( numberBits ) 	
 			  this.__isset_updated = true;
             } else { 
