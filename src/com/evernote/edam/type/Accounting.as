@@ -5,12 +5,13 @@
  */
 package com.evernote.edam.type {
 
-import org.apache.thrift.Set;
 import flash.utils.Dictionary;
 
 import org.apache.thrift.*;
+import org.apache.thrift.Set;
 import org.apache.thrift.meta_data.*;
 import org.apache.thrift.protocol.*;
+import org.syncon.evernote.utils.Convert64BitNumberToNumber;
 
   /**
    *  This represents the bookkeeping information for the user's subscription.
@@ -699,24 +700,24 @@ import org.apache.thrift.protocol.*;
         switch (field.id)
         {
           case UPLOADLIMIT:
-            if (field.type == TType.DOUBLE) {
-              this.uploadLimit = iprot.readDouble();
+            if (field.type == TType.I64 || field.type == TType.DOUBLE ) {
+              this.uploadLimit =  iprot.readI64()
               this.__isset_uploadLimit = true;
             } else { 
               TProtocolUtil.skip(iprot, field.type);
             }
             break;
           case UPLOADLIMITEND:
-            if (field.type == TType.DOUBLE) {
-              this.uploadLimitEnd = iprot.readDouble();
+            if (field.type == TType.I64 || field.type == TType.DOUBLE ) {
+              this.uploadLimitEnd =  iprot.readI64()
               this.__isset_uploadLimitEnd = true;
             } else { 
               TProtocolUtil.skip(iprot, field.type);
             }
             break;
           case UPLOADLIMITNEXTMONTH:
-            if (field.type == TType.DOUBLE) {
-              this.uploadLimitNextMonth = iprot.readDouble();
+            if (field.type == TType.I64 || field.type == TType.DOUBLE ) {
+              this.uploadLimitNextMonth =  iprot.readI64()
               this.__isset_uploadLimitNextMonth = true;
             } else { 
               TProtocolUtil.skip(iprot, field.type);
@@ -745,8 +746,8 @@ import org.apache.thrift.protocol.*;
             }
             break;
           case PREMIUMSERVICESTART:
-            if (field.type == TType.DOUBLE) {
-              this.premiumServiceStart = iprot.readDouble();
+            if (field.type == TType.I64 || field.type == TType.DOUBLE ) {
+              this.premiumServiceStart =  iprot.readI64()
               this.__isset_premiumServiceStart = true;
             } else { 
               TProtocolUtil.skip(iprot, field.type);
@@ -760,16 +761,16 @@ import org.apache.thrift.protocol.*;
             }
             break;
           case LASTSUCCESSFULCHARGE:
-            if (field.type == TType.DOUBLE) {
-              this.lastSuccessfulCharge = iprot.readDouble();
+            if (field.type == TType.I64 || field.type == TType.DOUBLE ) {
+              this.lastSuccessfulCharge =  iprot.readI64()
               this.__isset_lastSuccessfulCharge = true;
             } else { 
               TProtocolUtil.skip(iprot, field.type);
             }
             break;
           case LASTFAILEDCHARGE:
-            if (field.type == TType.DOUBLE) {
-              this.lastFailedCharge = iprot.readDouble();
+            if (field.type == TType.I64 || field.type == TType.DOUBLE ) {
+              this.lastFailedCharge =  iprot.readI64()
               this.__isset_lastFailedCharge = true;
             } else { 
               TProtocolUtil.skip(iprot, field.type);
@@ -783,24 +784,24 @@ import org.apache.thrift.protocol.*;
             }
             break;
           case NEXTPAYMENTDUE:
-            if (field.type == TType.DOUBLE) {
-              this.nextPaymentDue = iprot.readDouble();
+            if (field.type == TType.I64 || field.type == TType.DOUBLE ) {
+              this.nextPaymentDue =  iprot.readI64()
               this.__isset_nextPaymentDue = true;
             } else { 
               TProtocolUtil.skip(iprot, field.type);
             }
             break;
           case PREMIUMLOCKUNTIL:
-            if (field.type == TType.DOUBLE) {
-              this.premiumLockUntil = iprot.readDouble();
+            if (field.type == TType.I64 || field.type == TType.DOUBLE ) {
+              this.premiumLockUntil =  iprot.readI64()
               this.__isset_premiumLockUntil = true;
             } else { 
               TProtocolUtil.skip(iprot, field.type);
             }
             break;
           case UPDATED:
-            if (field.type == TType.DOUBLE) {
-              this.updated = iprot.readDouble();
+            if (field.type == TType.I64 || field.type == TType.DOUBLE ) {
+              this.updated =  iprot.readI64()
               this.__isset_updated = true;
             } else { 
               TProtocolUtil.skip(iprot, field.type);
@@ -814,8 +815,8 @@ import org.apache.thrift.protocol.*;
             }
             break;
           case LASTREQUESTEDCHARGE:
-            if (field.type == TType.DOUBLE) {
-              this.lastRequestedCharge = iprot.readDouble();
+            if (field.type == TType.I64 || field.type == TType.DOUBLE ) {
+              this.lastRequestedCharge = iprot.readI64()
               this.__isset_lastRequestedCharge = true;
             } else { 
               TProtocolUtil.skip(iprot, field.type);

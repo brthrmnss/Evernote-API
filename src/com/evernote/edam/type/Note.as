@@ -757,9 +757,7 @@ import org.syncon.evernote.utils.Convert64BitNumberToNumber;
             if (field.type == TType.I64 || field.type == TType.DOUBLE ) {
               /*this.created = iprot.readDouble();
               this.__isset_created = true;*/
-			  var numberBits : Object = iprot.readI64()
-			  var convertor :   Convert64BitNumberToNumber = new Convert64BitNumberToNumber()
-			  this.created = convertor.input2Ints( numberBits ) 
+			  this.created =  iprot.readI64()
 			  this.__isset_created = true;			  
             } else { 
               TProtocolUtil.skip(iprot, field.type);
@@ -769,9 +767,7 @@ import org.syncon.evernote.utils.Convert64BitNumberToNumber;
 			  if (field.type == TType.I64 || field.type == TType.DOUBLE ) {
               /*this.updated = iprot.readDouble();
               this.__isset_updated = true;*/
-			  numberBits  = iprot.readI64()
-			  convertor = new Convert64BitNumberToNumber()
-			  this.updated = convertor.input2Ints( numberBits ) 	
+			  this.updated =  iprot.readI64()
 			  this.__isset_updated = true;
             } else { 
               TProtocolUtil.skip(iprot, field.type);
@@ -779,7 +775,7 @@ import org.syncon.evernote.utils.Convert64BitNumberToNumber;
             break;
           case DELETED:
 			  if (field.type == TType.I64 || field.type == TType.DOUBLE ) {
-              this.deleted = iprot.readDouble();
+              this.deleted =  iprot.readI64()
               this.__isset_deleted = true;
             } else { 
               TProtocolUtil.skip(iprot, field.type);

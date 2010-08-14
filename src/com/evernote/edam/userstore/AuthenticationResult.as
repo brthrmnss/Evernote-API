@@ -274,9 +274,7 @@ import org.syncon.evernote.utils.Convert64BitNumberToNumber;
         {
           case CURRENTTIME:
 			 if (field.type == TType.I64 || field.type == TType.DOUBLE ) {
-			  var numberBits : Object = iprot.readI64()
-			  var convertor :   Convert64BitNumberToNumber = new Convert64BitNumberToNumber()
-			  this.currentTime = convertor.input2Ints( numberBits ) 
+			  this.currentTime =  iprot.readI64()
               this.__isset_currentTime = true;
             } else { 
               TProtocolUtil.skip(iprot, field.type);
@@ -291,9 +289,7 @@ import org.syncon.evernote.utils.Convert64BitNumberToNumber;
             break;
           case EXPIRATION:
 			if (field.type == TType.I64 || field.type == TType.DOUBLE ) {
-			  numberBits = iprot.readI64()
-			  convertor = new Convert64BitNumberToNumber()
-			  this.expiration = convertor.input2Ints( numberBits ) 
+			  this.expiration =  iprot.readI64()
               this.__isset_expiration = true;
             } else { 
               TProtocolUtil.skip(iprot, field.type);

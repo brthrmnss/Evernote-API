@@ -113,8 +113,10 @@ package org.apache.thrift.protocol {
     
     function readI32():int;
     
-    function readI64():Object;
+    function readI64RawBytes():Object;
     
+	function readI64():Number;	
+	
     function readDouble():Number;
     
     function readString():String;

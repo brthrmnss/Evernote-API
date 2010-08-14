@@ -24,6 +24,7 @@ package org.apache.thrift.protocol {
   import org.apache.thrift.TError;
   import org.apache.thrift.transport.THttpClient;
   import org.apache.thrift.transport.TTransport;
+  import org.syncon.evernote.utils.Convert64BitNumberToNumber;
     
   /**
    * Binary protocol implementation for thrift.
@@ -310,9 +311,7 @@ package org.apache.thrift.protocol {
     }
     */
  
-	public function readI64() :  Object {
-		 
-		
+	public function readI64RawBytes() :  Object {
 		var data : Object = {}
 		/*data.p1 = this.readI32()
 		data.p2 = this.readI32()		*/	
@@ -338,11 +337,19 @@ package org.apache.thrift.protocol {
 			
 		//most 64 bit numbers are for time implementations , if number will fit as a Number, 
 			//return number, else return binary bits as a string
-		
 		return data
-		 
 	} 
-    public function readDouble():Number {
+	
+	public function readI64() : Number {
+		//most 64 bit numbers are for time implementations , if number will fit as a Number, 
+		//return number, else return binary bits as a string
+		 var numberBits : Object = this.readI64RawBytes()
+		var convertor : Convert64BitNumberToNumber = new Convert64BitNumberToNumber()
+		 var number54 : Number= convertor.input2Ints( numberBits )  
+		return number54
+	} 	
+
+	public function readDouble():Number {
       readAll(8);
       return bytes.readDouble();
     }

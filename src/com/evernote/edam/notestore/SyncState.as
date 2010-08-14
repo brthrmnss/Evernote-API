@@ -244,16 +244,16 @@ import org.apache.thrift.protocol.*;
         switch (field.id)
         {
           case CURRENTTIME:
-            if (field.type == TType.DOUBLE) {
-              this.currentTime = iprot.readDouble();
+            if (field.type == TType.I64 || field.type == TType.DOUBLE ) {
+              this.currentTime = iprot.readI64()
               this.__isset_currentTime = true;
             } else { 
               TProtocolUtil.skip(iprot, field.type);
             }
             break;
           case FULLSYNCBEFORE:
-            if (field.type == TType.DOUBLE) {
-              this.fullSyncBefore = iprot.readDouble();
+            if (field.type == TType.I64 || field.type == TType.DOUBLE ) {
+              this.fullSyncBefore =  iprot.readI64()
               this.__isset_fullSyncBefore = true;
             } else { 
               TProtocolUtil.skip(iprot, field.type);
@@ -268,8 +268,8 @@ import org.apache.thrift.protocol.*;
             }
             break;
           case UPLOADED:
-            if (field.type == TType.DOUBLE) {
-              this.uploaded = iprot.readDouble();
+            if (field.type == TType.I64 || field.type == TType.DOUBLE ) {
+              this.uploaded =  iprot.readI64()
               this.__isset_uploaded = true;
             } else { 
               TProtocolUtil.skip(iprot, field.type);

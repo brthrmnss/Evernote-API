@@ -96,5 +96,13 @@ package   org.syncon.evernote.utils
 		
 		return number
 	}			
+	
+	//Convert64BitNumberToNumber.converti64
+	static public function converti64( numberBits : Object ) : Number
+	{
+		var convertor :   Convert64BitNumberToNumber = new Convert64BitNumberToNumber()
+		return convertor.input2Ints( numberBits ) 	
+	}
+	
 	}
 	}

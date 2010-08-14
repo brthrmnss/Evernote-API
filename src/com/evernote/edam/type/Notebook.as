@@ -450,8 +450,8 @@ import org.syncon.evernote.utils.Convert64BitNumberToNumber;
             break;
           case SERVICECREATED:
             if (field.type == TType.I64 || field.type == TType.DOUBLE) {
-              this.serviceCreated = iprot.readDouble();
-			  trace(  this.serviceCreated   )
+              this.serviceCreated =  iprot.readI64()
+			 // trace(  this.serviceCreated   )
               this.__isset_serviceCreated = true;
             } else { 
               TProtocolUtil.skip(iprot, field.type);
@@ -464,9 +464,7 @@ import org.syncon.evernote.utils.Convert64BitNumberToNumber;
 			  trace(  this.serviceUpdated   )
               this.__isset_serviceUpdated = true;
 			  */
-				var o : Object = iprot.readI64()
-				var ee :  Convert64BitNumberToNumber = new Convert64BitNumberToNumber
-				this.serviceUpdated = ee.input2Ints( o ) 
+				this.serviceUpdated =  iprot.readI64()
 				this.__isset_serviceUpdated = true;
 				//	trace(o)
             } else { 

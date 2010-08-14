@@ -5,12 +5,13 @@
  */
 package com.evernote.edam.type { 
 
-import org.apache.thrift.Set;
 import flash.utils.Dictionary;
 
 import org.apache.thrift.*;
+import org.apache.thrift.Set;
 import org.apache.thrift.meta_data.*;
 import org.apache.thrift.protocol.*;
+import org.syncon.evernote.utils.Convert64BitNumberToNumber;
 
   /**
    *  This represents the information about a single user account.
@@ -654,25 +655,31 @@ import org.apache.thrift.protocol.*;
             }
             break;
           case CREATED:
-            if (field.type == TType.I64) {
-              this.created = iprot.readDouble();
-              this.__isset_created = true;
+			  if (field.type == TType.I64 || field.type == TType.DOUBLE ) {
+				  /*this.created = iprot.readDouble();
+				  this.__isset_created = true;*/
+				  this.created = iprot.readI64()
+				  this.__isset_created = true;
             } else { 
               TProtocolUtil.skip(iprot, field.type);
             }
             break;
           case UPDATED:
-            if (field.type == TType.I64) {
-              this.updated = iprot.readDouble();
-              this.__isset_updated = true;
+			  if (field.type == TType.I64 || field.type == TType.DOUBLE ) {
+				  /*this.updated = iprot.readDouble();
+				  this.__isset_updated = true;*/
+				  this.updated =  iprot.readI64()
+				  this.__isset_updated = true;
             } else { 
               TProtocolUtil.skip(iprot, field.type);
             }
             break;
           case DELETED:
-            if (field.type == TType.I64) {
-              this.deleted = iprot.readDouble();
-              this.__isset_deleted = true;
+			  if (field.type == TType.I64 || field.type == TType.DOUBLE ) {
+				  /*this.deleted = iprot.readDouble();
+				  this.__isset_deleted = true;*/
+				  this.deleted =  iprot.readI64()
+				  this.__isset_deleted = true;
             } else { 
               TProtocolUtil.skip(iprot, field.type);
             }
