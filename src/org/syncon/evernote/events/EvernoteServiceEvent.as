@@ -21,6 +21,9 @@ package  org.syncon.evernote.events
 		public static const AUTH_GET:String = "authGet";
 		public static const AUTH_GET_FAULT:String = "authGetFault";
 		
+		public static const REFRESH_AUTHENTICATION:String = "refreshAuthenticationResult";
+		public static const REFRESH_AUTHENTICATION_FAULT:String = "refreshAuthenticationFault";		
+		
 		public static const GET_SYNC_STATE:String = "getSyncStateResult";		
 		public static const GET_SYNC_STATE_FAULT:String = "getSyncStateFault";
 		

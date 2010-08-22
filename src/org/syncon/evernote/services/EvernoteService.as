@@ -112,6 +112,21 @@ package org.syncon.evernote.services
 			//return authResult;
 		}		
 		
+		public function  refreshAuthentication(   ) : void 
+		{
+			userStore.refreshAuthentication( this.auth.authenticationToken, refreshAuthenticationFaultHandler, refreshAuthenticationResultHandler )
+		}			
+			private function refreshAuthenticationResultHandler(result:AuthenticationResult=null):void {
+				var temp : AuthenticationResult = this.auth
+				this.auth = result
+				result.user = temp.user; 
+				this.dispatch( new EvernoteServiceEvent( EvernoteServiceEvent.REFRESH_AUTHENTICATION, result, this.getSequenceNumber() )) 
+			}
+			private function refreshAuthenticationFaultHandler(result:Object=null):void {
+				this.dispatch( new EvernoteServiceEvent( EvernoteServiceEvent.REFRESH_AUTHENTICATION_FAULT, result, this.getSequenceNumber() )) 
+			}
+				
+		
 		public function handleCheckVersionResult(e:Object=null):void
 		{
 			userStore.authenticate(username,  password, this.API_CONSUMER_KEY, this.API_CONSUMER_SECRET,  handleAuthenticateFault, handleAuthenticateResult );
