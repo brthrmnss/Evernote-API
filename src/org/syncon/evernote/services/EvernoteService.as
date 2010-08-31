@@ -30,7 +30,7 @@ package org.syncon.evernote.services
 		
 		protected  var API_CONSUMER_KEY : String = "brthrmnss";
 		protected  var API_CONSUMER_SECRET : String = "770a8c70efe93e94";
-		protected  var edamBaseUrl  : String = "https://sandbox.evernote.com";
+		public static  var edamBaseUrl  : String = "https://sandbox.evernote.com";
 		protected var  userStoreUrl :String= edamBaseUrl + "/edam/user";
 		//protected var  noteStoreUrl :String= edamBaseUrl + "/edam/user";		
 		protected static var xmlHeader  : String = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
